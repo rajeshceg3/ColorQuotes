@@ -45,9 +45,9 @@ describe('LocalStorageService', () => {
       expect(localStorageMock.getItem(TEST_KEY)).toBe(JSON.stringify(TEST_OBJECT));
     });
 
-    it('should store a string directly', () => {
+    it('should store a JSON stringified version of a string', () => {
       LocalStorageService.setItem(TEST_KEY, TEST_STRING);
-      expect(localStorageMock.getItem(TEST_KEY)).toBe(TEST_STRING);
+      expect(localStorageMock.getItem(TEST_KEY)).toBe(JSON.stringify(TEST_STRING));
     });
 
     it('should log an error if JSON.stringify fails', () => {
@@ -65,9 +65,11 @@ describe('LocalStorageService', () => {
       expect(retrieved).toEqual(TEST_OBJECT);
     });
 
-    it('should retrieve a stored string', () => {
-      localStorageMock.setItem(TEST_KEY, TEST_STRING);
+    it('should retrieve and parse a stored string', () => {
+      // Store the string as it would be by setItem (JSON.stringify)
+      localStorageMock.setItem(TEST_KEY, JSON.stringify(TEST_STRING));
       const retrieved = LocalStorageService.getItem<string>(TEST_KEY);
+      // Expect the original string back, not the stringified version
       expect(retrieved).toBe(TEST_STRING);
     });
 

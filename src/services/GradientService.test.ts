@@ -50,24 +50,16 @@ describe('GradientService', () => {
     });
 
     it('should return the same gradient if only one gradient exists, even if provided as current', () => {
-      // Temporarily mock gradients to have only one
-      const singleGradientMock = [{ type: 'linear', angle: 'bg-gradient-to-r', colors: ['from-orange-500', 'to-teal-500'] }];
-      jest.spyOn(gradientService, 'generateGradient').mockImplementationOnce(() => {
-        // This mocking strategy is a bit tricky because the service reads data in constructor.
-        // A better way would be to mock the gradients.json import for this specific test,
-        // or make the service's gradient list mutable for testing.
-        // For now, let's test the logic directly: if the list had one item.
-        // This test will be conceptual or require a more complex setup.
-        // Alternative: modify the instance's private `gradients` for this test if possible.
-        const serviceWithOneGradient = GradientService.getInstance(); // new instance
-        (serviceWithOneGradient as any).gradients = singleGradientMock; // Type assertion to access private
+      const singleGradientMockItem = { type: 'linear', angle: 'bg-gradient-to-r', colors: ['from-orange-500', 'to-teal-500'] };
 
-        const current = singleGradientMock[0];
-        const result = serviceWithOneGradient.generateGradient(current);
-        expect(result).toEqual(current);
-        return result; // Added return
-      });
-      gradientService.generateGradient(); // Call the mocked method
+      // Modify the internal state of the 'gradientService' instance from beforeEach.
+      // This instance is configured by default with mockGradients.
+      (gradientService as any).gradients = [singleGradientMockItem];
+
+      // Call the original method on the modified instance,
+      // providing the single existing gradient as the current one.
+      const result = gradientService.generateGradient(singleGradientMockItem);
+      expect(result).toEqual(singleGradientMockItem);
     });
 
     it('should return null if no gradients are available', () => {
@@ -78,15 +70,16 @@ describe('GradientService', () => {
     });
 
     it('should return the gradient if only one is available, regardless of currentGradient', () => {
-        const serviceWithOneGradient = GradientService.getInstance();
+        // Using the 'gradientService' instance from beforeEach for consistency.
         const singleGradient = { type: 'linear', angle: 'bg-gradient-to-r', colors: ['from-single-1', 'to-single-2'] };
-        (serviceWithOneGradient as any).gradients = [singleGradient];
+        (gradientService as any).gradients = [singleGradient]; // Modify the instance from beforeEach
 
-        const current = { type: 'linear', angle: 'bg-gradient-to-b', colors: ['from-other-1', 'to-other-2'] };
-        let gradient = serviceWithOneGradient.generateGradient(current);
+        const currentOther = { type: 'linear', angle: 'bg-gradient-to-b', colors: ['from-other-1', 'to-other-2'] };
+        let gradient = gradientService.generateGradient(currentOther);
         expect(gradient).toEqual(singleGradient);
 
-        gradient = serviceWithOneGradient.generateGradient(singleGradient); // Current is the only one
+        // Case where currentGradient is the only one available
+        gradient = gradientService.generateGradient(singleGradient);
         expect(gradient).toEqual(singleGradient);
     });
   });
