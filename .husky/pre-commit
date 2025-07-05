@@ -3,7 +3,24 @@
 
 echo "Running pre-commit hooks..."
 
+# Update quote metadata
+echo "Updating quote metadata..."
+npm run update-metadata
+if [ $? -ne 0 ]; then
+  echo "Failed to update quote metadata. Please check the script."
+  exit 1
+fi
+
+# Add updated quotes.json to staging
+git add src/data/quotes.json
+if [ $? -ne 0 ]; then
+  echo "Failed to stage quotes.json. Please check git."
+  exit 1
+fi
+echo "Quote metadata updated and staged."
+
 # Run linters and formatters
+echo "Running linters and formatters..."
 npm run lint && npm run format
 
 # Check if linting and formatting were successful

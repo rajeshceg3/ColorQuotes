@@ -37,24 +37,24 @@ const QuoteDisplay: React.FC = () => {
     }
   }, [currentQuote]);
 
-  // Effect for modal accessibility (Escape key)
+  // Combined effect for modal accessibility (Escape key) and focusing the close button
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && showCopyModal) {
+      if (event.key === 'Escape') { // No need to check showCopyModal here, as the listener is added/removed based on it
         setShowCopyModal(false);
       }
     };
-    window.addEventListener('keydown', handleEsc);
+
+    if (showCopyModal) {
+      window.addEventListener('keydown', handleEsc);
+      if (modalCloseButtonRef.current) {
+        modalCloseButtonRef.current.focus();
+      }
+    }
+
     return () => {
       window.removeEventListener('keydown', handleEsc);
     };
-  }, [showCopyModal]);
-
-  // Focus the close button when modal opens
-  useEffect(() => {
-    if (showCopyModal && modalCloseButtonRef.current) {
-      modalCloseButtonRef.current.focus();
-    }
   }, [showCopyModal]);
 
   const changeQuoteContent = useCallback(() => {
