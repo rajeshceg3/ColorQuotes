@@ -22,6 +22,7 @@ export default {
         'pastel-yellow-1': '#FFF8E1',
         'pastel-yellow-2': '#FFECB3',
         'pastel-yellow-3': '#FFE082',
+        'muted-dark-canvas': '#2C3E50', // Added new color
       },
       fontSize: {
         'quote-lg': ['2.5rem', { lineHeight: '1.4' }],
@@ -48,6 +49,7 @@ export default {
           '"Segoe UI Symbol"',
           '"Noto Color Emoji"',
         ],
+        serif: ['Lora', 'serif'], // Added Lora
       },
     },
   },

@@ -166,7 +166,7 @@ const QuoteDisplay: React.FC = () => {
 
   return (
     <div
-      className="relative text-center w-full max-w-[600px] p-4 pt-8 bg-black bg-opacity-25 rounded-lg cursor-pointer
+      className="relative text-center w-full max-w-[600px] p-4 pt-8 bg-muted-dark-canvas rounded-lg cursor-pointer
                  transition-transform transform hover:scale-105 active:scale-100
                  focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-75"
       style={{ minHeight: '250px' }} // Increased minHeight for icons
@@ -244,13 +244,13 @@ const QuoteDisplay: React.FC = () => {
         {currentQuote ? (
           <>
             <p
-              className="text-quote-sm sm:text-quote-md lg:text-quote-lg font-light text-white"
+              className="text-quote-sm sm:text-quote-md lg:text-quote-lg font-light text-white font-serif"
               style={{ lineHeight: 1.4, marginTop: '20px' }} // Added marginTop to avoid overlap with icons
             >
               "{currentQuote.text}"
             </p>
             <p
-              className="mt-6 text-attrib-sm sm:text-attrib-md lg:text-attrib-lg font-medium text-white"
+              className="mt-6 text-attrib-sm sm:text-attrib-md lg:text-attrib-lg font-medium text-white font-serif"
               style={{ marginTop: '20px' }}
             >
               - {currentQuote.author}
