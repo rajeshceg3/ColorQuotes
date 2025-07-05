@@ -1,0 +1,99 @@
+{
+  "quotes": [
+    {
+      "id": "uuid-1",
+      "text": "The only way to do great work is to love what you do.",
+      "author": "Steve Jobs",
+      "category": "success",
+      "verified": true,
+      "character_count": 52,
+      "tags": ["work", "passion", "success"]
+    },
+    {
+      "id": "uuid-2",
+      "text": "Strive not to be a success, but rather to be of value.",
+      "author": "Albert Einstein",
+      "category": "wisdom",
+      "verified": true,
+      "character_count": 59,
+      "tags": ["value", "wisdom", "contribution"]
+    },
+    {
+      "id": "uuid-3",
+      "text": "The mind is everything. What you think you become.",
+      "author": "Buddha",
+      "category": "wisdom",
+      "verified": true,
+      "character_count": 49,
+      "tags": ["mindset", "thoughts", "philosophy"]
+    },
+    {
+      "id": "uuid-4",
+      "text": "Your time is limited, so don’t waste it living someone else’s life.",
+      "author": "Steve Jobs",
+      "category": "motivational",
+      "verified": true,
+      "character_count": 75,
+      "tags": ["time", "authenticity", "motivation"]
+    },
+    {
+      "id": "uuid-5",
+      "text": "The best way to predict the future is to create it.",
+      "author": "Peter Drucker",
+      "category": "creativity",
+      "verified": true,
+      "character_count": 53,
+      "tags": ["future", "creation", "action"]
+    },
+    {
+      "id": "uuid-6",
+      "text": "Happiness is not something readymade. It comes from your own actions.",
+      "author": "Dalai Lama",
+      "category": "happiness",
+      "verified": true,
+      "character_count": 75,
+      "tags": ["happiness", "action", "choice"]
+    },
+    {
+      "id": "uuid-7",
+      "text": "Believe you can and you're halfway there.",
+      "author": "Theodore Roosevelt",
+      "category": "motivational",
+      "verified": true,
+      "character_count": 42,
+      "tags": ["belief", "motivation", "confidence"]
+    },
+    {
+      "id": "uuid-8",
+      "text": "Everything you’ve ever wanted is on the other side of fear.",
+      "author": "George Addair",
+      "category": "motivational",
+      "verified": true,
+      "character_count": 65,
+      "tags": ["fear", "courage", "dreams"]
+    },
+    {
+      "id": "uuid-9",
+      "text": "The purpose of our lives is to be happy.",
+      "author": "Dalai Lama",
+      "category": "happiness",
+      "verified": true,
+      "character_count": 40,
+      "tags": ["purpose", "happiness", "life"]
+    },
+    {
+      "id": "uuid-10",
+      "text": "You must be the change you wish to see in the world.",
+      "author": "Mahatma Gandhi",
+      "category": "wisdom",
+      "verified": true,
+      "character_count": 56,
+      "tags": ["change", "action", "inspiration"]
+    }
+  ],
+  "metadata": {
+    "total_quotes": 10,
+    "last_updated": "2024-07-26T10:00:00Z",
+    "version": "0.1.0"
+  }
+}
