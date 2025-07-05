@@ -16,9 +16,9 @@ export interface Quote {
   category: QuoteCategory;
   source?: string;
   verified: boolean;
-  created_at?: Date; // Optional for now
-  updated_at?: Date; // Optional for now
-  language?: string; // Optional for now
+  created_at: string;
+  updated_at: string;
+  language: string;
   character_count: number;
   tags: string[];
 }

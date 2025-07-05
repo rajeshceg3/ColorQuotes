@@ -1,48 +1,50 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Quote } from '../../types';
-import rawQuoteData from '../../data/quotes.json';
-import { getReducedMotionDuration } from '../../utils/motion'; // Import new utility
+import { Quote, QuoteCategory } from '../../types'; // Added QuoteCategory
+import { QuoteService } from '../../services/QuoteService'; // Import QuoteService
+import { getReducedMotionDuration } from '../../utils/motion';
 
-const allQuotes: Quote[] = rawQuoteData.quotes;
+// const allQuotes: Quote[] = rawQuoteData.quotes; // Removed
 
-const getRandomQuote = (): Quote | null => {
-  if (!allQuotes || allQuotes.length === 0) return null;
-  const randomIndex = Math.floor(Math.random() * allQuotes.length);
-  return allQuotes[randomIndex];
-};
+// Removed local getRandomQuote
+// const getRandomQuote = (): Quote | null => {
+// if (!allQuotes || allQuotes.length === 0) return null;
+// const randomIndex = Math.floor(Math.random() * allQuotes.length);
+// return allQuotes[randomIndex];
+// };
 
 const QUOTE_ROTATION_INTERVAL = 30000; // 30 seconds
-const BASE_QUOTE_FADE_DURATION = 800; // PRD: 0.8s total fade duration (e.g. 400ms out, 400ms in)
-                                      // For a single opacity transition, this is the total time.
-                                      // The prompt uses 400ms for one part. Let's use PRD's 0.8s for the CSS transition.
+const BASE_QUOTE_FADE_DURATION = 800;
+
+const quoteService = QuoteService.getInstance(); // Instantiate service
 
 const QuoteDisplay: React.FC = () => {
-  const [currentQuote, setCurrentQuote] = useState<Quote | null>(getRandomQuote);
-  const [isQuoteVisible, setIsQuoteVisible] = useState(true); // Controls opacity for fade
+  const [currentQuote, setCurrentQuote] = useState<Quote | null>(() => quoteService.getRandomQuote());
+  const [isQuoteVisible, setIsQuoteVisible] = useState(true);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [showCopyTooltip, setShowCopyTooltip] = useState(false);
   const quoteIntervalRef = useRef<number | null>(null);
-  // isAnimatingRef can be helpful if animations become more complex than just opacity
   // For now, !isQuoteVisible during the timeout period serves a similar purpose for blocking clicks.
-  // Let's add it as per prompt to see its role.
   const isAnimatingRef = useRef(false);
-
 
   const quoteFadeDuration = getReducedMotionDuration(BASE_QUOTE_FADE_DURATION);
 
-  // Function to pick a new quote and update state
-  const changeQuoteContent = useCallback(() => {
-    setCurrentQuote(prevQuote => { // Use functional update for setCurrentQuote
-      if (allQuotes.length === 0) return null;
-      if (allQuotes.length === 1) return allQuotes[0];
+  // Update isFavorited state when currentQuote changes
+  useEffect(() => {
+    if (currentQuote) {
+      setIsFavorited(quoteService.isQuoteFavorited(currentQuote.id));
+    }
+  }, [currentQuote]);
 
-      let newQuote;
-      do {
-        newQuote = allQuotes[Math.floor(Math.random() * allQuotes.length)];
-      } while (newQuote.id === prevQuote?.id); // Ensure different from previous quote
+  const changeQuoteContent = useCallback(() => {
+    setCurrentQuote(prevQuote => {
+      const newQuote = quoteService.getRandomQuote();
+      if (newQuote === null && prevQuote !== null) {
+        return prevQuote;
+      }
       return newQuote;
     });
-  }, []); // No direct dependency on currentQuote here, functional update handles it.
+  }, []);
 
-  // Function to handle the fade animation and content change
   const animateAndChangeQuote = useCallback((isTriggeredByTimer: boolean = false) => {
     // Prevent starting a new animation if one is already in progress (manual trigger)
     if (isAnimatingRef.current && !isTriggeredByTimer) return;
@@ -59,25 +61,26 @@ const QuoteDisplay: React.FC = () => {
   }, [changeQuoteContent, quoteFadeDuration]);
 
 
-  // Effect for initial load and managing the timer
+  // Effect for initial load, visibility, and managing the timer
   useEffect(() => {
-    // currentQuote is now initialized directly via useState.
-    // Ensure quote is visible if one was successfully loaded.
     if (currentQuote) {
       setIsQuoteVisible(true);
+      // setIsFavorited(quoteService.isQuoteFavorited(currentQuote.id)); // Moved to separate useEffect
     }
 
-    // Clear previous interval
     if (quoteIntervalRef.current) {
       clearInterval(quoteIntervalRef.current);
     }
 
-    // Setup new interval if there are multiple quotes
-    if (allQuotes.length > 1) {
-      quoteIntervalRef.current = window.setInterval(() => {
-        animateAndChangeQuote(true); // Trigger animation for timer
-      }, QUOTE_ROTATION_INTERVAL);
-    }
+    // Setup new interval. The service will handle cases where few quotes are available.
+    // We can check if quoteService has more than one quote to decide to set interval.
+    // For now, let's assume the interval is always set and `animateAndChangeQuote` handles nulls.
+    // A more robust way: check quoteService.getQuotes(2).length > 1 or similar.
+    // Let's keep the interval running. If getRandomQuote returns null, UI handles it.
+    quoteIntervalRef.current = window.setInterval(() => {
+      animateAndChangeQuote(true); // Trigger animation for timer
+    }, QUOTE_ROTATION_INTERVAL);
+
 
     // Cleanup on unmount or before effect re-runs
     return () => {
@@ -102,31 +105,84 @@ const QuoteDisplay: React.FC = () => {
     );
   }
 
+  const handleToggleFavorite = (event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent triggering next quote
+    if (!currentQuote) return;
+    const currentlyFavorited = quoteService.isQuoteFavorited(currentQuote.id);
+    if (currentlyFavorited) {
+      quoteService.removeFavorite(currentQuote.id);
+      setIsFavorited(false);
+    } else {
+      quoteService.addFavorite(currentQuote.id);
+      setIsFavorited(true);
+    }
+  };
+
+  const handleCopyQuote = async (event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent triggering next quote
+    if (!currentQuote) return;
+    const quoteTextToCopy = `"${currentQuote.text}" - ${currentQuote.author}`;
+    try {
+      await navigator.clipboard.writeText(quoteTextToCopy);
+      setShowCopyTooltip(true);
+      setTimeout(() => setShowCopyTooltip(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy quote: ', err);
+      // Optionally, show an error tooltip
+    }
+  };
+
   return (
     <div
-      className="text-center w-full max-w-xl p-4 bg-black bg-opacity-10 rounded-lg cursor-pointer
+      className="relative text-center w-full max-w-[600px] p-4 pt-8 bg-black bg-opacity-25 rounded-lg cursor-pointer
                  transition-transform transform hover:scale-105 active:scale-100
-                 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-75" // Added focus styles
-      style={{ minHeight: '200px' }}
+                 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-75"
+      style={{ minHeight: '250px' }} // Increased minHeight for icons
       onClick={handleInteraction}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleInteraction(); } }}
-      aria-label="Display next quote" // ARIA label for the button
+      aria-label="Display next quote"
     >
+      {/* Icons Container */}
+      <div className="absolute top-2 right-2 flex space-x-2">
+        <button
+          onClick={handleToggleFavorite}
+          aria-label={isFavorited ? "Unfavorite this quote" : "Favorite this quote"}
+          className="p-2 text-2xl text-white hover:text-yellow-400 focus:outline-none focus:ring-1 focus:ring-yellow-400 rounded-full"
+          aria-pressed={isFavorited}
+        >
+          {isFavorited ? '★' : '☆'}
+        </button>
+        <div className="relative">
+          <button
+            onClick={handleCopyQuote}
+            aria-label="Copy quote and author"
+            className="p-2 text-xl text-white hover:text-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400 rounded-full"
+          >
+            📋
+          </button>
+          {showCopyTooltip && (
+            <span className="absolute top-full mt-1 right-0 bg-black text-white text-xs px-2 py-1 rounded">
+              Copied!
+            </span>
+          )}
+        </div>
+      </div>
+
       <div
         style={{
           opacity: isQuoteVisible ? 1 : 0,
-          transition: `opacity ${quoteFadeDuration}ms ease-in-out`, // Use potentially reduced duration
+          transition: `opacity ${quoteFadeDuration}ms ease-in-out`,
         }}
-        aria-live="polite"  // Announce changes to screen readers
-        aria-atomic="true"   // Announce the entire region as a whole
+        aria-live="polite"
+        aria-atomic="true"
       >
         {currentQuote ? (
           <>
             <p
               className="text-quote-sm sm:text-quote-md lg:text-quote-lg font-light text-white"
-              style={{ lineHeight: 1.4 }}
+              style={{ lineHeight: 1.4, marginTop: '20px' }} // Added marginTop to avoid overlap with icons
             >
               "{currentQuote.text}"
             </p>
@@ -138,12 +194,8 @@ const QuoteDisplay: React.FC = () => {
             </p>
           </>
         ) : (
-          // Placeholder to maintain height during fade when currentQuote might be briefly null
-          // Also ensures aria-live region has content to announce if it becomes empty.
-          // The prompt used text-transparent h-10. Let's ensure consistent height.
-          // An actual min-height on the inner div might be better if text length varies a lot.
-          <div style={{ minHeight: '100px' }}> {/* Estimate based on typical quote size */}
-             <p className="text-transparent">&nbsp;</p> {/* Screen reader might read "blank" or skip. */}
+          <div style={{ minHeight: '100px' }}>
+             <p className="text-transparent">&nbsp;</p>
           </div>
         )}
       </div>
