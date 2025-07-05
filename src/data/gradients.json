@@ -1,0 +1,29 @@
+{
+  "gradients": [
+    {
+      "type": "linear",
+      "angle": "bg-gradient-to-br",
+      "colors": ["from-pastel-pink-1", "to-pastel-purple-2"]
+    },
+    {
+      "type": "linear",
+      "angle": "bg-gradient-to-r",
+      "colors": ["from-pastel-green-1", "to-pastel-blue-1"]
+    },
+    {
+      "type": "linear",
+      "angle": "bg-gradient-to-tl",
+      "colors": ["from-pastel-yellow-1", "to-pastel-pink-2"]
+    },
+    {
+      "type": "linear",
+      "angle": "bg-gradient-to-b",
+      "colors": ["from-pastel-blue-2", "to-pastel-purple-1"]
+    },
+    {
+      "type": "linear",
+      "angle": "bg-gradient-to-tr",
+      "colors": ["from-pastel-green-2", "to-pastel-yellow-2"]
+    }
+  ]
+}
