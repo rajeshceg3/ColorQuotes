@@ -32,11 +32,9 @@ export class GradientService {
       return null; // No gradients available
     }
 
-    if (this.gradients.length === 1 && currentGradient) {
-      // If only one gradient exists, and it's the current one, we have to return it.
-      // Or, if it's the same as currentGradient, still return it as no other choice.
-      return this.gradients[0];
-    }
+    // The case where this.gradients.length === 1 is handled by the do-while loop,
+    // as (this.gradients.length > 1) will be false, causing the loop to execute once
+    // and return the single available gradient.
 
     let selectedGradient: GradientDefinition;
     do {

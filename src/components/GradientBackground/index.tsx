@@ -12,16 +12,23 @@ const gradientService = GradientService.getInstance(); // Instantiate service
 const FALLBACK_GRADIENT_CLASSES = 'bg-gray-800'; // Fallback if service returns null
 
 const GradientBackground: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Store the definition objects and derive classes from them
-  const [currentBg1Def, setCurrentBg1Def] = useState<GradientDefinition | null>(() => gradientService.generateGradient());
-  const [currentBg2Def, setCurrentBg2Def] = useState<GradientDefinition | null>(() => gradientService.generateGradient(currentBg1Def));
+  // Calculate all initial values together before initializing states
+  const initialBg1Def = gradientService.generateGradient();
+  const initialBg2Def = gradientService.generateGradient(initialBg1Def); // Depends on initialBg1Def
 
-  const [bg1Classes, setBg1Classes] = useState<string>(() =>
-    currentBg1Def ? GradientService.formatGradientToTailwind(currentBg1Def) : FALLBACK_GRADIENT_CLASSES
-  );
-  const [bg2Classes, setBg2Classes] = useState<string>(() =>
-    currentBg2Def ? GradientService.formatGradientToTailwind(currentBg2Def) : FALLBACK_GRADIENT_CLASSES
-  );
+  const initialBg1Classes = initialBg1Def
+    ? GradientService.formatGradientToTailwind(initialBg1Def)
+    : FALLBACK_GRADIENT_CLASSES;
+  const initialBg2Classes = initialBg2Def
+    ? GradientService.formatGradientToTailwind(initialBg2Def)
+    : FALLBACK_GRADIENT_CLASSES;
+
+  // Store the definition objects and derive classes from them
+  const [currentBg1Def, setCurrentBg1Def] = useState<GradientDefinition | null>(initialBg1Def);
+  const [currentBg2Def, setCurrentBg2Def] = useState<GradientDefinition | null>(initialBg2Def);
+
+  const [bg1Classes, setBg1Classes] = useState<string>(initialBg1Classes);
+  const [bg2Classes, setBg2Classes] = useState<string>(initialBg2Classes);
 
   const [bg1Opacity, setBg1Opacity] = useState(1);
   const [bg2Opacity, setBg2Opacity] = useState(0);
@@ -29,6 +36,17 @@ const GradientBackground: React.FC<{ children: React.ReactNode }> = ({ children 
   const activeBgRef = useRef<1 | 2>(1);
   const gradientIntervalRef = useRef<number | null>(null);
   const gradientTransitionDuration = getReducedMotionDuration(BASE_GRADIENT_TRANSITION_DURATION);
+
+  // Refs to hold the current gradient definitions for use in changeGradient callback
+  // This allows changeGradient to not have currentBg1Def/currentBg2Def as dependencies
+  // and thus remain stable, preventing useEffect from re-running the interval setup.
+  const currentBg1DefRef = useRef(initialBg1Def);
+  const currentBg2DefRef = useRef(initialBg2Def);
+
+  useEffect(() => {
+    currentBg1DefRef.current = currentBg1Def;
+    currentBg2DefRef.current = currentBg2Def;
+  }, [currentBg1Def, currentBg2Def]);
 
   // This function is no longer needed in the same way, service handles selection.
   // const getNewGradientClasses = useCallback((excludeDefinition: GradientDefinition | null): string => {
@@ -38,8 +56,11 @@ const GradientBackground: React.FC<{ children: React.ReactNode }> = ({ children 
   // }, []);
 
   const changeGradient = useCallback(() => {
+    const bg1DefForExclusion = currentBg1DefRef.current;
+    const bg2DefForExclusion = currentBg2DefRef.current;
+
     if (activeBgRef.current === 1) {
-      const newDef2 = gradientService.generateGradient(currentBg1Def);
+      const newDef2 = gradientService.generateGradient(bg1DefForExclusion);
       if (newDef2) { // Only update if a new gradient is found
         setCurrentBg2Def(newDef2);
         setBg2Classes(GradientService.formatGradientToTailwind(newDef2));
@@ -50,7 +71,7 @@ const GradientBackground: React.FC<{ children: React.ReactNode }> = ({ children 
       setBg2Opacity(1);
       activeBgRef.current = 2;
     } else {
-      const newDef1 = gradientService.generateGradient(currentBg2Def);
+      const newDef1 = gradientService.generateGradient(bg2DefForExclusion);
       if (newDef1) {
         setCurrentBg1Def(newDef1);
         setBg1Classes(GradientService.formatGradientToTailwind(newDef1));
@@ -59,28 +80,22 @@ const GradientBackground: React.FC<{ children: React.ReactNode }> = ({ children 
       setBg2Opacity(0);
       activeBgRef.current = 1;
     }
-  }, [currentBg1Def, currentBg2Def]); // Dependencies: the current definitions
+  }, [gradientService, setCurrentBg1Def, setBg1Classes, setCurrentBg2Def, setBg2Classes, setBg1Opacity, setBg2Opacity, activeBgRef]);
 
   useEffect(() => {
-    // Initial setup: bg1Def is set, derive its classes. Preload bg2Def and its classes.
-    const initialBg1Def = gradientService.generateGradient();
-    setCurrentBg1Def(initialBg1Def);
-    setBg1Classes(initialBg1Def ? GradientService.formatGradientToTailwind(initialBg1Def) : FALLBACK_GRADIENT_CLASSES);
-    setBg1Opacity(1);
-
-    const initialBg2Def = gradientService.generateGradient(initialBg1Def);
-    setCurrentBg2Def(initialBg2Def);
-    setBg2Classes(initialBg2Def ? GradientService.formatGradientToTailwind(initialBg2Def) : FALLBACK_GRADIENT_CLASSES);
-    setBg2Opacity(0);
-
-    activeBgRef.current = 1;
+    // Initial opacities are set via useState.
+    // activeBgRef is initialized to 1 by default.
+    // Interval management is the primary role of this effect now.
 
     // Manage interval
     if (gradientIntervalRef.current) clearInterval(gradientIntervalRef.current);
     // The service handles providing gradients; interval runs if service might provide different ones.
     // A check like `gradientService.getAllGradients().length > 1` could be used.
     // For now, always run interval, service ensures different one if possible.
-    gradientIntervalRef.current = window.setInterval(changeGradient, GRADIENT_CHANGE_INTERVAL);
+    // Ensure that the effect correctly handles the case where window is not defined (e.g., SSR)
+    if (typeof window !== 'undefined') {
+      gradientIntervalRef.current = window.setInterval(changeGradient, GRADIENT_CHANGE_INTERVAL);
+    }
 
     return () => {
       if (gradientIntervalRef.current) clearInterval(gradientIntervalRef.current);

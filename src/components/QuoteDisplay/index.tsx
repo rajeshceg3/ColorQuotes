@@ -23,6 +23,7 @@ const QuoteDisplay: React.FC = () => {
   const [isFavorited, setIsFavorited] = useState(false);
   const [showCopyTooltip, setShowCopyTooltip] = useState(false);
   const quoteIntervalRef = useRef<number | null>(null);
+  const tooltipTimeoutRef = useRef<number | null>(null); // Ref for the tooltip timeout
   // For now, !isQuoteVisible during the timeout period serves a similar purpose for blocking clicks.
   const isAnimatingRef = useRef(false);
 
@@ -34,6 +35,16 @@ const QuoteDisplay: React.FC = () => {
       setIsFavorited(quoteService.isQuoteFavorited(currentQuote.id));
     }
   }, [currentQuote]);
+
+  // Effect to clear tooltip timeout on change or unmount
+  useEffect(() => {
+    // Cleanup function to clear the timeout
+    return () => {
+      if (tooltipTimeoutRef.current !== null) {
+        clearTimeout(tooltipTimeoutRef.current);
+      }
+    };
+  }, [showCopyTooltip]); // Runs when showCopyTooltip changes or component unmounts
 
   const changeQuoteContent = useCallback(() => {
     setCurrentQuote(prevQuote => {
@@ -108,12 +119,18 @@ const QuoteDisplay: React.FC = () => {
   const handleToggleFavorite = (event: React.MouseEvent) => {
     event.stopPropagation(); // Prevent triggering next quote
     if (!currentQuote) return;
-    const currentlyFavorited = quoteService.isQuoteFavorited(currentQuote.id);
-    if (currentlyFavorited) {
+
+    // Use the isFavorited state as the source of truth
+    if (isFavorited) {
       quoteService.removeFavorite(currentQuote.id);
       setIsFavorited(false);
     } else {
-      quoteService.addFavorite(currentQuote.id);
+      // Assuming addFavorite can work with ID if the quote context is clear,
+      // or it might expect the full currentQuote object.
+      // For consistency with removeFavorite, using ID.
+      // If QuoteService.addFavorite expects a Quote object:
+      // quoteService.addFavorite(currentQuote);
+      quoteService.addFavorite(currentQuote.id); // Or currentQuote if the service API requires
       setIsFavorited(true);
     }
   };
@@ -125,7 +142,13 @@ const QuoteDisplay: React.FC = () => {
     try {
       await navigator.clipboard.writeText(quoteTextToCopy);
       setShowCopyTooltip(true);
-      setTimeout(() => setShowCopyTooltip(false), 2000);
+      // Clear any existing timeout before setting a new one
+      if (tooltipTimeoutRef.current !== null) {
+        clearTimeout(tooltipTimeoutRef.current);
+      }
+      tooltipTimeoutRef.current = window.setTimeout(() => {
+        setShowCopyTooltip(false);
+      }, 2000);
     } catch (err) {
       console.error('Failed to copy quote: ', err);
       // Optionally, show an error tooltip
