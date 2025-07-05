@@ -21,7 +21,7 @@ describe('GradientBackground Component', () => {
 
   beforeEach(() => {
     jest.useFakeTimers();
-    jest.spyOn(Math, 'random').mockReturnValue(0); // Always pick first gradient for initial
+    jest.spyOn(Math, 'random').mockReturnValueOnce(0).mockReturnValueOnce(1 / mockGradients.length); // Always pick first gradient for initial
 
     getReducedMotionDurationMock = jest.spyOn(motionUtils, 'getReducedMotionDuration')
                                       .mockImplementation((duration: number) => duration);

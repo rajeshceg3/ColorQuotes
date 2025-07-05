@@ -22,9 +22,3 @@ export interface Quote {
   character_count: number;
   tags: string[];
 }
-
-export interface GradientConfig {
-  colors: string[]; // Array of color stops, e.g., ['#E3F2FD', '#BBDEFB']
-  angle?: string; // e.g., '45deg', 'to right', etc.
-  type: 'linear' | 'radial';
-}

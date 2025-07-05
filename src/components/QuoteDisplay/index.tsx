@@ -4,13 +4,20 @@ import rawQuoteData from '../../data/quotes.json';
 import { getReducedMotionDuration } from '../../utils/motion'; // Import new utility
 
 const allQuotes: Quote[] = rawQuoteData.quotes;
+
+const getRandomQuote = (): Quote | null => {
+  if (!allQuotes || allQuotes.length === 0) return null;
+  const randomIndex = Math.floor(Math.random() * allQuotes.length);
+  return allQuotes[randomIndex];
+};
+
 const QUOTE_ROTATION_INTERVAL = 30000; // 30 seconds
 const BASE_QUOTE_FADE_DURATION = 800; // PRD: 0.8s total fade duration (e.g. 400ms out, 400ms in)
                                       // For a single opacity transition, this is the total time.
                                       // The prompt uses 400ms for one part. Let's use PRD's 0.8s for the CSS transition.
 
 const QuoteDisplay: React.FC = () => {
-  const [currentQuote, setCurrentQuote] = useState<Quote | null>(null);
+  const [currentQuote, setCurrentQuote] = useState<Quote | null>(getRandomQuote);
   const [isQuoteVisible, setIsQuoteVisible] = useState(true); // Controls opacity for fade
   const quoteIntervalRef = useRef<number | null>(null);
   // isAnimatingRef can be helpful if animations become more complex than just opacity
@@ -54,11 +61,10 @@ const QuoteDisplay: React.FC = () => {
 
   // Effect for initial load and managing the timer
   useEffect(() => {
-    if (!currentQuote && allQuotes.length > 0) {
-      // Initial load: select quote directly without fade
-      const randomIndex = Math.floor(Math.random() * allQuotes.length);
-      setCurrentQuote(allQuotes[randomIndex]);
-      setIsQuoteVisible(true); // Ensure it's visible initially
+    // currentQuote is now initialized directly via useState.
+    // Ensure quote is visible if one was successfully loaded.
+    if (currentQuote) {
+      setIsQuoteVisible(true);
     }
 
     // Clear previous interval
@@ -79,18 +85,19 @@ const QuoteDisplay: React.FC = () => {
         clearInterval(quoteIntervalRef.current);
       }
     };
-  }, [currentQuote, animateAndChangeQuote]); // Timer resets when currentQuote changes
+  }, [animateAndChangeQuote, currentQuote]); // Added currentQuote back to ensure interval restarts if quote somehow changes externally, though unlikely with current setup.
 
   const handleInteraction = () => {
     if (isAnimatingRef.current) return;
     animateAndChangeQuote(false); // Manually triggered
   };
 
-  // ARIA live region for loading state
-  if (!currentQuote && isQuoteVisible && !isAnimatingRef.current) {
+  // Loading state is removed as currentQuote should be initialized.
+  // A check for !currentQuote can still be useful for the empty allQuotes case.
+  if (!currentQuote) {
     return (
       <p className="text-center text-xl text-white p-10" aria-live="polite">
-        Loading inspiration...
+        No quotes available.
       </p>
     );
   }
@@ -104,7 +111,7 @@ const QuoteDisplay: React.FC = () => {
       onClick={handleInteraction}
       role="button"
       tabIndex={0}
-      onKeyPress={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleInteraction(); } }}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleInteraction(); } }}
       aria-label="Display next quote" // ARIA label for the button
     >
       <div

@@ -9,7 +9,7 @@ const GRADIENT_CHANGE_INTERVAL = 15000; // How often the gradient attempts to ch
 const allGradients: GradientDef[] = gradientData.gradients;
 
 const GradientBackground: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [bg1Classes, setBg1Classes] = useState<string>('');
+  const [bg1Classes, setBg1Classes] = useState<string>(() => getNewGradientClasses(null));
   const [bg2Classes, setBg2Classes] = useState<string>('');
   const [bg1Opacity, setBg1Opacity] = useState(1);
   const [bg2Opacity, setBg2Opacity] = useState(0);
@@ -49,10 +49,9 @@ const GradientBackground: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useEffect(() => {
     // Initial setup
-    const initialBg1 = getNewGradientClasses(null);
-    setBg1Classes(initialBg1);
+    // bg1Classes is now initialized directly via useState
     setBg1Opacity(1);
-    setBg2Classes(getNewGradientClasses(initialBg1)); // Preload second bg
+    setBg2Classes(getNewGradientClasses(bg1Classes)); // Preload second bg, using the already initialized bg1Classes
     setBg2Opacity(0);
     activeBgRef.current = 1;
 
@@ -88,9 +87,6 @@ const GradientBackground: React.FC<{ children: React.ReactNode }> = ({ children 
         }}
         aria-hidden="true" // Decorative background
       />
-      {/* Fallback for initial render if classes aren't set, though useEffect should handle it */}
-      {(!bg1Classes && !bg2Classes) && <div className="absolute inset-0 bg-gray-700" aria-hidden="true" />}
-
       <div className="relative min-h-screen w-full flex flex-col items-center justify-center isolate">
         {children}
       </div>
