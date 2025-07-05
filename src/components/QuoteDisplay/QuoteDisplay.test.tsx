@@ -217,7 +217,6 @@ describe('QuoteDisplay Component', () => {
       const okButton = screen.getByRole('button', { name: /OK/i });
       fireEvent.click(okButton);
 
-      await act(async () => { jest.advanceTimersByTime(10); }); // Allow state update
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
 
@@ -228,7 +227,6 @@ describe('QuoteDisplay Component', () => {
 
       fireEvent.keyDown(document, { key: 'Escape', code: 'Escape' });
 
-      await act(async () => { jest.advanceTimersByTime(10); }); // Allow state update
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
 
@@ -240,7 +238,6 @@ describe('QuoteDisplay Component', () => {
       // The overlay is the dialog element itself in this implementation for click handling
       fireEvent.click(dialog);
 
-      await act(async () => { jest.advanceTimersByTime(10); });
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
 
