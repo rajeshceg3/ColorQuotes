@@ -24,12 +24,12 @@ export default {
         'pastel-yellow-3': '#FFE082',
       },
       fontSize: {
-        'quote-sm': '1.8rem',
-        'attrib-sm': '1rem',
-        'quote-md': '2.2rem',
-        'attrib-md': '1.1rem',
-        'quote-lg': '2.5rem',
-        'attrib-lg': '1.2rem'
+        'quote-lg': ['2.5rem', { lineHeight: '1.4' }],
+        'quote-md': ['2.2rem', { lineHeight: '1.4' }],
+        'quote-sm': ['1.8rem', { lineHeight: '1.4' }],
+        'attrib-lg': ['1.2rem', { lineHeight: '1.4' }],
+        'attrib-md': ['1.1rem', { lineHeight: '1.4' }],
+        'attrib-sm': ['1.0rem', { lineHeight: '1.4' }],
       },
       fontFamily: {
         sans: [

@@ -32,6 +32,14 @@ describe('QuoteDisplay Component', () => {
                                       .mockImplementation((duration: number) => duration);
 
     // Define a default mock for window.matchMedia
+    // Mock navigator.clipboard
+    Object.defineProperty(navigator, 'clipboard', {
+      value: {
+        writeText: jest.fn().mockResolvedValue(undefined),
+      },
+      configurable: true,
+    });
+
     matchMediaMock = jest.spyOn(window, 'matchMedia').mockImplementation(query => ({
         matches: false, // Default to no reduced motion
         media: query,
@@ -177,5 +185,72 @@ describe('QuoteDisplay Component', () => {
     const liveRegion = screen.getByText(`"${mockQuotes[0].text}"`).closest('div[aria-live="polite"]');
     expect(liveRegion).toHaveAttribute('aria-live', 'polite');
     expect(liveRegion).toHaveAttribute('aria-atomic', 'true');
+  });
+
+  // New tests for Copy Quote Modal
+  describe('Copy Quote Modal Functionality', () => {
+    const initialQuote = mockQuotes[0];
+    const expectedCopiedText = `"${initialQuote.text}" - ${initialQuote.author}`;
+
+    beforeEach(async () => {
+      // Ensure component is rendered and initial quote is set
+      render(<QuoteDisplay />);
+      await act(async () => { jest.advanceTimersByTime(10); }); // For initial quote
+    });
+
+    test('opens copy modal with correct content and calls clipboard', async () => {
+      const copyButton = screen.getByRole('button', { name: /Copy quote and author/i });
+      fireEvent.click(copyButton);
+
+      await screen.findByRole('dialog'); // Wait for modal to appear
+
+      expect(screen.getByText('Quote Copied to Clipboard!')).toBeInTheDocument();
+      expect(screen.getByText(expectedCopiedText)).toBeInTheDocument();
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expectedCopiedText);
+    });
+
+    test('closes copy modal when OK button is clicked', async () => {
+      const copyButton = screen.getByRole('button', { name: /Copy quote and author/i });
+      fireEvent.click(copyButton);
+      await screen.findByRole('dialog'); // Modal appears
+
+      const okButton = screen.getByRole('button', { name: /OK/i });
+      fireEvent.click(okButton);
+
+      await act(async () => { jest.advanceTimersByTime(10); }); // Allow state update
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    test('closes copy modal when Escape key is pressed', async () => {
+      const copyButton = screen.getByRole('button', { name: /Copy quote and author/i });
+      fireEvent.click(copyButton);
+      await screen.findByRole('dialog'); // Modal appears
+
+      fireEvent.keyDown(document, { key: 'Escape', code: 'Escape' });
+
+      await act(async () => { jest.advanceTimersByTime(10); }); // Allow state update
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    test('closes copy modal when overlay is clicked', async () => {
+      const copyButton = screen.getByRole('button', { name: /Copy quote and author/i });
+      fireEvent.click(copyButton);
+
+      const dialog = await screen.findByRole('dialog'); // Modal appears
+      // The overlay is the dialog element itself in this implementation for click handling
+      fireEvent.click(dialog);
+
+      await act(async () => { jest.advanceTimersByTime(10); });
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    test('focus is moved to OK button when modal opens', async () => {
+      const copyButton = screen.getByRole('button', { name: /Copy quote and author/i });
+      fireEvent.click(copyButton);
+      await screen.findByRole('dialog');
+
+      const okButton = screen.getByRole('button', { name: /OK/i });
+      expect(okButton).toHaveFocus();
+    });
   });
 });

@@ -21,11 +21,12 @@ const QuoteDisplay: React.FC = () => {
   const [currentQuote, setCurrentQuote] = useState<Quote | null>(() => quoteService.getRandomQuote());
   const [isQuoteVisible, setIsQuoteVisible] = useState(true);
   const [isFavorited, setIsFavorited] = useState(false);
-  const [showCopyTooltip, setShowCopyTooltip] = useState(false);
+  const [showCopyModal, setShowCopyModal] = useState(false);
+  const [copiedQuoteText, setCopiedQuoteText] = useState("");
   const quoteIntervalRef = useRef<number | null>(null);
-  const tooltipTimeoutRef = useRef<number | null>(null); // Ref for the tooltip timeout
-  // For now, !isQuoteVisible during the timeout period serves a similar purpose for blocking clicks.
+  // tooltipTimeoutRef is no longer needed for the modal
   const isAnimatingRef = useRef(false);
+  const modalCloseButtonRef = useRef<HTMLButtonElement>(null);
 
   const quoteFadeDuration = getReducedMotionDuration(BASE_QUOTE_FADE_DURATION);
 
@@ -36,15 +37,25 @@ const QuoteDisplay: React.FC = () => {
     }
   }, [currentQuote]);
 
-  // Effect to clear tooltip timeout on change or unmount
+  // Effect for modal accessibility (Escape key)
   useEffect(() => {
-    // Cleanup function to clear the timeout
-    return () => {
-      if (tooltipTimeoutRef.current !== null) {
-        clearTimeout(tooltipTimeoutRef.current);
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && showCopyModal) {
+        setShowCopyModal(false);
       }
     };
-  }, [showCopyTooltip]); // Runs when showCopyTooltip changes or component unmounts
+    window.addEventListener('keydown', handleEsc);
+    return () => {
+      window.removeEventListener('keydown', handleEsc);
+    };
+  }, [showCopyModal]);
+
+  // Focus the close button when modal opens
+  useEffect(() => {
+    if (showCopyModal && modalCloseButtonRef.current) {
+      modalCloseButtonRef.current.focus();
+    }
+  }, [showCopyModal]);
 
   const changeQuoteContent = useCallback(() => {
     setCurrentQuote(prevQuote => {
@@ -138,21 +149,19 @@ const QuoteDisplay: React.FC = () => {
   const handleCopyQuote = async (event: React.MouseEvent) => {
     event.stopPropagation(); // Prevent triggering next quote
     if (!currentQuote) return;
-    const quoteTextToCopy = `"${currentQuote.text}" - ${currentQuote.author}`;
+    const textToCopy = `"${currentQuote.text}" - ${currentQuote.author}`;
     try {
-      await navigator.clipboard.writeText(quoteTextToCopy);
-      setShowCopyTooltip(true);
-      // Clear any existing timeout before setting a new one
-      if (tooltipTimeoutRef.current !== null) {
-        clearTimeout(tooltipTimeoutRef.current);
-      }
-      tooltipTimeoutRef.current = window.setTimeout(() => {
-        setShowCopyTooltip(false);
-      }, 2000);
+      await navigator.clipboard.writeText(textToCopy);
+      setCopiedQuoteText(textToCopy);
+      setShowCopyModal(true);
     } catch (err) {
       console.error('Failed to copy quote: ', err);
-      // Optionally, show an error tooltip
+      // Optionally, show an error tooltip or different modal
     }
+  };
+
+  const handleCloseCopyModal = () => {
+    setShowCopyModal(false);
   };
 
   return (
@@ -185,13 +194,44 @@ const QuoteDisplay: React.FC = () => {
           >
             📋
           </button>
-          {showCopyTooltip && (
-            <span className="absolute top-full mt-1 right-0 bg-black text-white text-xs px-2 py-1 rounded">
-              Copied!
-            </span>
-          )}
+          {/* Tooltip is removed, modal will replace it */}
         </div>
       </div>
+
+      {/* Modal for Copy Confirmation */}
+      {showCopyModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="copyModalTitle"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          onClick={handleCloseCopyModal} // Close on overlay click
+        >
+          <div
+            className="fixed inset-0 bg-black bg-opacity-75 transition-opacity"
+            aria-hidden="true"
+          ></div>
+          <div
+            className="relative bg-gray-800 text-white rounded-lg shadow-xl p-6 w-full max-w-md mx-auto"
+            onClick={(e) => e.stopPropagation()} // Prevent overlay click from closing if clicking inside modal content
+          >
+            <h3 id="copyModalTitle" className="text-lg font-semibold mb-3">
+              Quote Copied to Clipboard!
+            </h3>
+            <p className="text-sm text-gray-300 mb-1">Successfully copied:</p>
+            <p className="text-sm bg-gray-700 p-2 rounded mb-4 break-words">
+              {copiedQuoteText}
+            </p>
+            <button
+              ref={modalCloseButtonRef}
+              onClick={handleCloseCopyModal}
+              className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-white font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
 
       <div
         style={{
