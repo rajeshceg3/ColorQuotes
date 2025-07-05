@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "Running pre-commit hooks..."
+
+# Run linters and formatters
+npm run lint && npm run format
+
+# Check if linting and formatting were successful
+if [ $? -ne 0 ]; then
+  echo "Linting or formatting failed. Please fix the issues before committing."
+  exit 1
+fi
+
+echo "Pre-commit hooks passed."
+exit 0

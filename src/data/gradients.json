@@ -24,6 +24,66 @@
       "type": "linear",
       "angle": "bg-gradient-to-tr",
       "colors": ["from-pastel-green-2", "to-pastel-yellow-2"]
+    },
+    {
+      "type": "linear",
+      "angle": "bg-gradient-to-l",
+      "colors": ["from-pastel-pink-2", "to-pastel-yellow-1"]
+    },
+    {
+      "type": "linear",
+      "angle": "bg-gradient-to-bl",
+      "colors": ["from-pastel-purple-1", "to-pastel-green-2"]
+    },
+    {
+      "type": "linear",
+      "angle": "bg-gradient-to-t",
+      "colors": ["from-pastel-blue-1", "to-pastel-pink-1"]
+    },
+    {
+      "type": "linear",
+      "angle": "bg-gradient-to-r",
+      "colors": ["from-pastel-yellow-2", "via-pastel-green-1", "to-pastel-blue-2"]
+    },
+    {
+      "type": "linear",
+      "angle": "bg-gradient-to-b",
+      "colors": ["from-pastel-pink-1", "via-pastel-purple-2", "to-pastel-yellow-1"]
+    },
+    {
+      "type": "linear",
+      "angle": "bg-gradient-to-tr",
+      "colors": ["from-pastel-green-1", "to-pastel-purple-1"]
+    },
+    {
+      "type": "linear",
+      "angle": "bg-gradient-to-bl",
+      "colors": ["from-pastel-blue-2", "via-pastel-pink-2", "to-pastel-green-1"]
+    },
+    {
+      "type": "linear",
+      "angle": "bg-gradient-to-t",
+      "colors": ["from-pastel-yellow-1", "to-pastel-purple-2"]
+    },
+    {
+      "type": "linear",
+      "angle": "bg-gradient-to-r",
+      "colors": ["from-pastel-pink-1", "to-pastel-green-2"]
+    },
+    {
+      "type": "linear",
+      "angle": "bg-gradient-to-br",
+      "colors": ["from-pastel-blue-1", "via-pastel-yellow-2", "to-pastel-purple-1"]
+    },
+    {
+      "type": "linear",
+      "angle": "bg-gradient-to-tl",
+      "colors": ["from-pastel-green-2", "to-pastel-pink-1"]
+    },
+    {
+      "type": "linear",
+      "angle": "bg-gradient-to-b",
+      "colors": ["from-pastel-purple-2", "via-pastel-blue-1", "to-pastel-yellow-2"]
     }
   ]
 }
