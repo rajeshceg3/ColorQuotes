@@ -1,5 +1,5 @@
 // src/services/GradientService.ts
-import allGradientsData from '../../data/gradients.json'; // Adjusted path
+import allGradientsData from '../data/gradients.json'; // Adjusted path
 
 export interface GradientDefinition {
   type: string;
