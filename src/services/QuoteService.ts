@@ -1,6 +1,6 @@
 // src/services/QuoteService.ts
 import { Quote, QuoteCategory } from '../types';
-import allQuotesData from '../../data/quotes.json'; // Adjusted path
+import allQuotesData from '../data/quotes.json'; // Adjusted path
 import { LocalStorageService } from './LocalStorageService';
 
 const VIEWED_QUOTES_KEY = 'viewedQuotes';
