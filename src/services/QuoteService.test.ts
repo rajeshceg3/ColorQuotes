@@ -14,7 +14,7 @@ const mockQuotes: Quote[] = [
 ];
 
 // Mock the data module
-jest.mock('../../data/quotes.json', () => ({
+jest.mock('../data/quotes.json', () => ({
   quotes: mockQuotes,
   metadata: {
     total_quotes: mockQuotes.length,

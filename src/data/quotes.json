@@ -11,7 +11,11 @@
       "updated_at": "2024-01-01T00:00:00Z",
       "language": "en",
       "character_count": 52,
-      "tags": ["work", "passion", "success"]
+      "tags": [
+        "work",
+        "passion",
+        "success"
+      ]
     },
     {
       "id": "uuid-2",
@@ -24,7 +28,11 @@
       "updated_at": "2024-01-01T00:00:00Z",
       "language": "en",
       "character_count": 59,
-      "tags": ["value", "wisdom", "contribution"]
+      "tags": [
+        "value",
+        "wisdom",
+        "contribution"
+      ]
     },
     {
       "id": "uuid-3",
@@ -37,7 +45,11 @@
       "updated_at": "2024-01-01T00:00:00Z",
       "language": "en",
       "character_count": 49,
-      "tags": ["mindset", "thoughts", "philosophy"]
+      "tags": [
+        "mindset",
+        "thoughts",
+        "philosophy"
+      ]
     },
     {
       "id": "uuid-4",
@@ -50,7 +62,11 @@
       "updated_at": "2024-01-01T00:00:00Z",
       "language": "en",
       "character_count": 75,
-      "tags": ["time", "authenticity", "motivation"]
+      "tags": [
+        "time",
+        "authenticity",
+        "motivation"
+      ]
     },
     {
       "id": "uuid-5",
@@ -63,7 +79,11 @@
       "updated_at": "2024-01-01T00:00:00Z",
       "language": "en",
       "character_count": 53,
-      "tags": ["future", "creation", "action"]
+      "tags": [
+        "future",
+        "creation",
+        "action"
+      ]
     },
     {
       "id": "uuid-6",
@@ -76,7 +96,11 @@
       "updated_at": "2024-01-01T00:00:00Z",
       "language": "en",
       "character_count": 75,
-      "tags": ["happiness", "action", "choice"]
+      "tags": [
+        "happiness",
+        "action",
+        "choice"
+      ]
     },
     {
       "id": "uuid-7",
@@ -89,7 +113,11 @@
       "updated_at": "2024-01-01T00:00:00Z",
       "language": "en",
       "character_count": 42,
-      "tags": ["belief", "motivation", "confidence"]
+      "tags": [
+        "belief",
+        "motivation",
+        "confidence"
+      ]
     },
     {
       "id": "uuid-8",
@@ -102,7 +130,11 @@
       "updated_at": "2024-01-01T00:00:00Z",
       "language": "en",
       "character_count": 65,
-      "tags": ["fear", "courage", "dreams"]
+      "tags": [
+        "fear",
+        "courage",
+        "dreams"
+      ]
     },
     {
       "id": "uuid-9",
@@ -115,7 +147,11 @@
       "updated_at": "2024-01-01T00:00:00Z",
       "language": "en",
       "character_count": 40,
-      "tags": ["purpose", "happiness", "life"]
+      "tags": [
+        "purpose",
+        "happiness",
+        "life"
+      ]
     },
     {
       "id": "uuid-10",
@@ -128,7 +164,11 @@
       "updated_at": "2024-01-01T00:00:00Z",
       "language": "en",
       "character_count": 56,
-      "tags": ["change", "action", "inspiration"]
+      "tags": [
+        "change",
+        "action",
+        "inspiration"
+      ]
     },
     {
       "id": "uuid-11",
@@ -141,7 +181,11 @@
       "updated_at": "2024-01-01T00:00:00Z",
       "language": "en",
       "character_count": 63,
-      "tags": ["leadership", "vision", "reality"]
+      "tags": [
+        "leadership",
+        "vision",
+        "reality"
+      ]
     },
     {
       "id": "uuid-12",
@@ -154,7 +198,11 @@
       "updated_at": "2024-01-01T00:00:00Z",
       "language": "en",
       "character_count": 78,
-      "tags": ["limits", "doubts", "realization"]
+      "tags": [
+        "limits",
+        "doubts",
+        "realization"
+      ]
     },
     {
       "id": "uuid-13",
@@ -167,7 +215,11 @@
       "updated_at": "2024-01-01T00:00:00Z",
       "language": "en",
       "character_count": 38,
-      "tags": ["creativity", "intelligence", "fun"]
+      "tags": [
+        "creativity",
+        "intelligence",
+        "fun"
+      ]
     },
     {
       "id": "uuid-14",
@@ -180,7 +232,11 @@
       "updated_at": "2024-01-01T00:00:00Z",
       "language": "en",
       "character_count": 90,
-      "tags": ["success", "failure", "courage"]
+      "tags": [
+        "success",
+        "failure",
+        "courage"
+      ]
     },
     {
       "id": "uuid-15",
@@ -193,7 +249,11 @@
       "updated_at": "2024-01-01T00:00:00Z",
       "language": "en",
       "character_count": 96,
-      "tags": ["self", "potential", "inner-strength"]
+      "tags": [
+        "self",
+        "potential",
+        "inner-strength"
+      ]
     },
     {
       "id": "uuid-16",
@@ -206,7 +266,11 @@
       "updated_at": "2024-01-01T00:00:00Z",
       "language": "en",
       "character_count": 60,
-      "tags": ["journey", "beginnings", "perseverance"]
+      "tags": [
+        "journey",
+        "beginnings",
+        "perseverance"
+      ]
     },
     {
       "id": "uuid-17",
@@ -219,7 +283,11 @@
       "updated_at": "2024-01-01T00:00:00Z",
       "language": "en",
       "character_count": 120,
-      "tags": ["authenticity", "individuality", "self-esteem"]
+      "tags": [
+        "authenticity",
+        "individuality",
+        "self-esteem"
+      ]
     },
     {
       "id": "uuid-18",
@@ -232,7 +300,11 @@
       "updated_at": "2024-01-01T00:00:00Z",
       "language": "en",
       "character_count": 70,
-      "tags": ["leadership", "guidance", "example"]
+      "tags": [
+        "leadership",
+        "guidance",
+        "example"
+      ]
     },
     {
       "id": "uuid-19",
@@ -245,7 +317,11 @@
       "updated_at": "2024-01-01T00:00:00Z",
       "language": "en",
       "character_count": 66,
-      "tags": ["perseverance", "progress", "consistency"]
+      "tags": [
+        "perseverance",
+        "progress",
+        "consistency"
+      ]
     },
     {
       "id": "uuid-20",
@@ -258,7 +334,11 @@
       "updated_at": "2024-01-01T00:00:00Z",
       "language": "en",
       "character_count": 43,
-      "tags": ["knowledge", "experience", "learning"]
+      "tags": [
+        "knowledge",
+        "experience",
+        "learning"
+      ]
     },
     {
       "id": "uuid-21",
@@ -271,7 +351,11 @@
       "updated_at": "2024-01-01T00:00:00Z",
       "language": "en",
       "character_count": 58,
-      "tags": ["kindness", "service", "helpfulness"]
+      "tags": [
+        "kindness",
+        "service",
+        "helpfulness"
+      ]
     },
     {
       "id": "uuid-22",
@@ -284,7 +368,11 @@
       "updated_at": "2024-01-01T00:00:00Z",
       "language": "en",
       "character_count": 74,
-      "tags": ["future", "dreams", "belief"]
+      "tags": [
+        "future",
+        "dreams",
+        "belief"
+      ]
     },
     {
       "id": "uuid-23",
@@ -297,7 +385,11 @@
       "updated_at": "2024-01-01T00:00:00Z",
       "language": "en",
       "character_count": 87,
-      "tags": ["innovation", "leadership", "originality"]
+      "tags": [
+        "innovation",
+        "leadership",
+        "originality"
+      ]
     },
     {
       "id": "uuid-24",
@@ -310,7 +402,11 @@
       "updated_at": "2024-01-01T00:00:00Z",
       "language": "en",
       "character_count": 51,
-      "tags": ["action", "impact", "difference"]
+      "tags": [
+        "action",
+        "impact",
+        "difference"
+      ]
     },
     {
       "id": "uuid-25",
@@ -323,7 +419,11 @@
       "updated_at": "2024-01-01T00:00:00Z",
       "language": "en",
       "character_count": 64,
-      "tags": ["perspective", "reaction", "attitude"]
+      "tags": [
+        "perspective",
+        "reaction",
+        "attitude"
+      ]
     },
     {
       "id": "uuid-26",
@@ -336,7 +436,11 @@
       "updated_at": "2024-07-31T10:00:00Z",
       "language": "en",
       "character_count": 58,
-      "tags": ["journey", "learning", "growth"]
+      "tags": [
+        "journey",
+        "learning",
+        "growth"
+      ]
     },
     {
       "id": "uuid-27",
@@ -349,7 +453,11 @@
       "updated_at": "2024-07-31T10:00:00Z",
       "language": "en",
       "character_count": 46,
-      "tags": ["idea", "innovation", "spark"]
+      "tags": [
+        "idea",
+        "innovation",
+        "spark"
+      ]
     },
     {
       "id": "uuid-28",
@@ -362,7 +470,11 @@
       "updated_at": "2024-07-31T10:00:00Z",
       "language": "en",
       "character_count": 58,
-      "tags": ["success", "effort", "consistency"]
+      "tags": [
+        "success",
+        "effort",
+        "consistency"
+      ]
     },
     {
       "id": "uuid-29",
@@ -375,7 +487,11 @@
       "updated_at": "2024-07-31T10:00:00Z",
       "language": "en",
       "character_count": 56,
-      "tags": ["joy", "gratitude", "smallthings"]
+      "tags": [
+        "joy",
+        "gratitude",
+        "smallthings"
+      ]
     },
     {
       "id": "uuid-30",
@@ -388,7 +504,11 @@
       "updated_at": "2024-07-31T10:00:00Z",
       "language": "en",
       "character_count": 24,
-      "tags": ["wisdom", "wonder", "curiosity"]
+      "tags": [
+        "wisdom",
+        "wonder",
+        "curiosity"
+      ]
     },
     {
       "id": "uuid-31",
@@ -401,7 +521,11 @@
       "updated_at": "2024-07-31T10:00:00Z",
       "language": "en",
       "character_count": 33,
-      "tags": ["obstacles", "opportunities", "mindset"]
+      "tags": [
+        "obstacles",
+        "opportunities",
+        "mindset"
+      ]
     },
     {
       "id": "uuid-32",
@@ -414,7 +538,11 @@
       "updated_at": "2024-07-31T10:00:00Z",
       "language": "en",
       "character_count": 59,
-      "tags": ["innovation", "leadership", "distinction"]
+      "tags": [
+        "innovation",
+        "leadership",
+        "distinction"
+      ]
     },
     {
       "id": "uuid-33",
@@ -427,7 +555,11 @@
       "updated_at": "2024-07-31T10:00:00Z",
       "language": "en",
       "character_count": 49,
-      "tags": ["action", "start", "progress"]
+      "tags": [
+        "action",
+        "start",
+        "progress"
+      ]
     },
     {
       "id": "uuid-34",
@@ -440,7 +572,11 @@
       "updated_at": "2024-07-31T10:00:00Z",
       "language": "en",
       "character_count": 39,
-      "tags": ["happiness", "journey", "direction"]
+      "tags": [
+        "happiness",
+        "journey",
+        "direction"
+      ]
     },
     {
       "id": "uuid-35",
@@ -453,7 +589,11 @@
       "updated_at": "2024-07-31T10:00:00Z",
       "language": "en",
       "character_count": 36,
-      "tags": ["knowledge", "wisdom", "listening"]
+      "tags": [
+        "knowledge",
+        "wisdom",
+        "listening"
+      ]
     },
     {
       "id": "uuid-36",
@@ -466,7 +606,11 @@
       "updated_at": "2024-07-31T10:00:00Z",
       "language": "en",
       "character_count": 25,
-      "tags": ["dreams", "action", "ambition"]
+      "tags": [
+        "dreams",
+        "action",
+        "ambition"
+      ]
     },
     {
       "id": "uuid-37",
@@ -479,19 +623,23 @@
       "updated_at": "2024-07-31T10:00:00Z",
       "language": "en",
       "character_count": 39,
-      "tags": ["attitude", "direction", "success"]
+      "tags": [
+        "attitude",
+        "direction",
+        "success"
+      ]
     }
   ],
   "metadata": {
     "total_quotes": 37,
-    "last_updated": "2024-07-31T10:00:00Z",
+    "last_updated": "2024-07-31T16:05:07.418876Z",
     "version": "1.1",
     "categories": {
-      "motivational": 25,
-      "success": 22,
-      "happiness": 22,
-      "wisdom": 26,
-      "creativity": 23,
+      "success": 5,
+      "wisdom": 8,
+      "motivational": 9,
+      "creativity": 5,
+      "happiness": 5,
       "leadership": 2,
       "perseverance": 3,
       "general": 2
