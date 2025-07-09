@@ -32,19 +32,23 @@ export class GradientService {
       return null; // No gradients available
     }
 
-    // The case where this.gradients.length === 1 is handled by the do-while loop,
-    // as (this.gradients.length > 1) will be false, causing the loop to execute once
-    // and return the single available gradient.
+    if (this.gradients.length === 1) {
+      return this.gradients[0];
+    }
 
     let selectedGradient: GradientDefinition;
+    let attempts = 0;
+    const maxAttempts = this.gradients.length * 2; // Set a reasonable attempt limit
+
     do {
       const randomIndex = Math.floor(Math.random() * this.gradients.length);
       selectedGradient = this.gradients[randomIndex];
+      attempts++;
     } while (
       currentGradient &&
-      this.gradients.length > 1 && // Only try to find a different one if there's more than one
       selectedGradient.angle === currentGradient.angle &&
-      selectedGradient.colors.join(',') === currentGradient.colors.join(',') // Simple comparison
+      selectedGradient.colors.join(',') === currentGradient.colors.join(',') &&
+      attempts < maxAttempts
     );
 
     return selectedGradient;

@@ -1,26 +1,39 @@
 // src/services/GradientService.test.ts
 import { GradientService, GradientDefinition } from './GradientService';
 
+jest.mock('../../data/gradients.json', () => ({
+  gradients: [
+    { type: 'linear', angle: 'bg-gradient-to-r', colors: ['from-red-500', 'to-blue-500'] },
+    { type: 'linear', angle: 'bg-gradient-to-b', colors: ['from-green-500', 'to-yellow-500'] },
+    { type: 'linear', angle: 'bg-gradient-to-l', colors: ['from-purple-500', 'to-pink-500'] },
+  ]
+}));
+
 const mockGradients: GradientDefinition[] = [
   { type: 'linear', angle: 'bg-gradient-to-r', colors: ['from-red-500', 'to-blue-500'] },
   { type: 'linear', angle: 'bg-gradient-to-b', colors: ['from-green-500', 'to-yellow-500'] },
   { type: 'linear', angle: 'bg-gradient-to-l', colors: ['from-purple-500', 'to-pink-500'] },
 ];
 
-// Mock the data module
-jest.mock('../../data/gradients.json', () => ({
-  gradients: mockGradients,
-}), { virtual: true });
+
 
 describe('GradientService', () => {
-  let gradientService: GradientService;
+  let GradientService: any;
+  let gradientService: any;
+  const mockGradients: GradientDefinition[] = [
+    { type: 'linear', angle: 'bg-gradient-to-r', colors: ['from-red-500', 'to-blue-500'] },
+    { type: 'linear', angle: 'bg-gradient-to-b', colors: ['from-green-500', 'to-yellow-500'] },
+    { type: 'linear', angle: 'bg-gradient-to-l', colors: ['from-purple-500', 'to-pink-500'] },
+  ];
 
-  beforeEach(() => {
-    // Get a fresh instance for each test.
-    // Similar to QuoteService, relies on jest.resetModules() if state becomes an issue,
-    // or a dedicated reset method on the service.
+  beforeEach(async () => {
+    const module = await import('./GradientService');
+    GradientService = module.GradientService;
     gradientService = GradientService.getInstance();
-     // Jest's hoisting of `jest.mock` should ensure mockGradients are used by the constructor.
+  });
+
+  afterEach(() => {
+    jest.resetModules();
   });
 
   describe('generateGradient', () => {

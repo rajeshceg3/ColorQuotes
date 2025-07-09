@@ -2,15 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Quote, QuoteCategory } from '../../types'; // Added QuoteCategory
 import { QuoteService } from '../../services/QuoteService'; // Import QuoteService
 import { getReducedMotionDuration } from '../../utils/motion';
-
-// const allQuotes: Quote[] = rawQuoteData.quotes; // Removed
-
-// Removed local getRandomQuote
-// const getRandomQuote = (): Quote | null => {
-// if (!allQuotes || allQuotes.length === 0) return null;
-// const randomIndex = Math.floor(Math.random() * allQuotes.length);
-// return allQuotes[randomIndex];
-// };
+import './QuoteDisplay.css';
 
 const QUOTE_ROTATION_INTERVAL = 30000; // 30 seconds
 const BASE_QUOTE_FADE_DURATION = 800;
@@ -21,12 +13,10 @@ const QuoteDisplay: React.FC = () => {
   const [currentQuote, setCurrentQuote] = useState<Quote | null>(() => quoteService.getRandomQuote());
   const [isQuoteVisible, setIsQuoteVisible] = useState(true);
   const [isFavorited, setIsFavorited] = useState(false);
-  const [showCopyModal, setShowCopyModal] = useState(false);
-  const [copiedQuoteText, setCopiedQuoteText] = useState("");
+  const [showCopyTooltip, setShowCopyTooltip] = useState(false);
   const quoteIntervalRef = useRef<number | null>(null);
-  // tooltipTimeoutRef is no longer needed for the modal
   const isAnimatingRef = useRef(false);
-  const modalCloseButtonRef = useRef<HTMLButtonElement>(null);
+  const tooltipTimeoutRef = useRef<number | null>(null);
 
   const quoteFadeDuration = getReducedMotionDuration(BASE_QUOTE_FADE_DURATION);
 
@@ -36,26 +26,6 @@ const QuoteDisplay: React.FC = () => {
       setIsFavorited(quoteService.isQuoteFavorited(currentQuote.id));
     }
   }, [currentQuote]);
-
-  // Combined effect for modal accessibility (Escape key) and focusing the close button
-  useEffect(() => {
-    const handleEsc = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') { // No need to check showCopyModal here, as the listener is added/removed based on it
-        setShowCopyModal(false);
-      }
-    };
-
-    if (showCopyModal) {
-      window.addEventListener('keydown', handleEsc);
-      if (modalCloseButtonRef.current) {
-        modalCloseButtonRef.current.focus();
-      }
-    }
-
-    return () => {
-      window.removeEventListener('keydown', handleEsc);
-    };
-  }, [showCopyModal]);
 
   const changeQuoteContent = useCallback(() => {
     setCurrentQuote(prevQuote => {
@@ -87,18 +57,12 @@ const QuoteDisplay: React.FC = () => {
   useEffect(() => {
     if (currentQuote) {
       setIsQuoteVisible(true);
-      // setIsFavorited(quoteService.isQuoteFavorited(currentQuote.id)); // Moved to separate useEffect
     }
 
     if (quoteIntervalRef.current) {
       clearInterval(quoteIntervalRef.current);
     }
 
-    // Setup new interval. The service will handle cases where few quotes are available.
-    // We can check if quoteService has more than one quote to decide to set interval.
-    // For now, let's assume the interval is always set and `animateAndChangeQuote` handles nulls.
-    // A more robust way: check quoteService.getQuotes(2).length > 1 or similar.
-    // Let's keep the interval running. If getRandomQuote returns null, UI handles it.
     quoteIntervalRef.current = window.setInterval(() => {
       animateAndChangeQuote(true); // Trigger animation for timer
     }, QUOTE_ROTATION_INTERVAL);
@@ -109,16 +73,17 @@ const QuoteDisplay: React.FC = () => {
       if (quoteIntervalRef.current) {
         clearInterval(quoteIntervalRef.current);
       }
+      if (tooltipTimeoutRef.current) {
+        clearTimeout(tooltipTimeoutRef.current);
+      }
     };
-  }, [animateAndChangeQuote, currentQuote]); // Added currentQuote back to ensure interval restarts if quote somehow changes externally, though unlikely with current setup.
+  }, [animateAndChangeQuote]);
 
   const handleInteraction = () => {
     if (isAnimatingRef.current) return;
     animateAndChangeQuote(false); // Manually triggered
   };
 
-  // Loading state is removed as currentQuote should be initialized.
-  // A check for !currentQuote can still be useful for the empty allQuotes case.
   if (!currentQuote) {
     return (
       <p className="text-center text-xl text-white p-10" aria-live="polite">
@@ -131,18 +96,13 @@ const QuoteDisplay: React.FC = () => {
     event.stopPropagation(); // Prevent triggering next quote
     if (!currentQuote) return;
 
-    // Use the isFavorited state as the source of truth
-    if (isFavorited) {
-      quoteService.removeFavorite(currentQuote.id);
-      setIsFavorited(false);
+    const newFavoritedState = !isFavorited;
+    setIsFavorited(newFavoritedState);
+
+    if (newFavoritedState) {
+      quoteService.addFavorite(currentQuote.id);
     } else {
-      // Assuming addFavorite can work with ID if the quote context is clear,
-      // or it might expect the full currentQuote object.
-      // For consistency with removeFavorite, using ID.
-      // If QuoteService.addFavorite expects a Quote object:
-      // quoteService.addFavorite(currentQuote);
-      quoteService.addFavorite(currentQuote.id); // Or currentQuote if the service API requires
-      setIsFavorited(true);
+      quoteService.removeFavorite(currentQuote.id);
     }
   };
 
@@ -152,16 +112,17 @@ const QuoteDisplay: React.FC = () => {
     const textToCopy = `"${currentQuote.text}" - ${currentQuote.author}`;
     try {
       await navigator.clipboard.writeText(textToCopy);
-      setCopiedQuoteText(textToCopy);
-      setShowCopyModal(true);
+      setShowCopyTooltip(true);
+      if (tooltipTimeoutRef.current) {
+        clearTimeout(tooltipTimeoutRef.current);
+      }
+      tooltipTimeoutRef.current = window.setTimeout(() => {
+        setShowCopyTooltip(false);
+      }, 2000); // Hide tooltip after 2 seconds
     } catch (err) {
       console.error('Failed to copy quote: ', err);
-      // Optionally, show an error tooltip or different modal
+      // Optionally, show an error tooltip
     }
-  };
-
-  const handleCloseCopyModal = () => {
-    setShowCopyModal(false);
   };
 
   return (
@@ -194,44 +155,13 @@ const QuoteDisplay: React.FC = () => {
           >
             📋
           </button>
-          {/* Tooltip is removed, modal will replace it */}
+          {showCopyTooltip && (
+            <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-700 text-white text-xs rounded-md">
+              Copied!
+            </div>
+          )}
         </div>
       </div>
-
-      {/* Modal for Copy Confirmation */}
-      {showCopyModal && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="copyModalTitle"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          onClick={handleCloseCopyModal} // Close on overlay click
-        >
-          <div
-            className="fixed inset-0 bg-black bg-opacity-75 transition-opacity"
-            aria-hidden="true"
-          ></div>
-          <div
-            className="relative bg-gray-800 text-white rounded-lg shadow-xl p-6 w-full max-w-md mx-auto"
-            onClick={(e) => e.stopPropagation()} // Prevent overlay click from closing if clicking inside modal content
-          >
-            <h3 id="copyModalTitle" className="text-lg font-semibold mb-3">
-              Quote Copied to Clipboard!
-            </h3>
-            <p className="text-sm text-gray-300 mb-1">Successfully copied:</p>
-            <p className="text-sm bg-gray-700 p-2 rounded mb-4 break-words">
-              {copiedQuoteText}
-            </p>
-            <button
-              ref={modalCloseButtonRef}
-              onClick={handleCloseCopyModal}
-              className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-white font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75"
-            >
-              OK
-            </button>
-          </div>
-        </div>
-      )}
 
       <div
         style={{

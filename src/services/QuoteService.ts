@@ -51,15 +51,32 @@ export class QuoteService {
       return true;
     });
 
-    // Filter by category if provided
-    const categoryFilteredQuotes = currentCategory
+    let categoryFilteredQuotes = currentCategory
       ? availableQuotes.filter(quote => quote.category === currentCategory)
       : availableQuotes;
 
     if (categoryFilteredQuotes.length === 0) {
-      // If no quotes are available after filtering (e.g., all viewed recently or category empty)
-      // Optionally, could return from allQuotes if categoryFiltered is empty but availableQuotes is not
-      return null;
+      // If no quotes are available after filtering, reset the viewed quotes for the given category
+      if (currentCategory) {
+        const viewedQuotes = LocalStorageService.getItem<ViewedQuotes>(VIEWED_QUOTES_KEY) || {};
+        this.quotes.forEach(quote => {
+          if (quote.category === currentCategory) {
+            delete viewedQuotes[quote.id];
+          }
+        });
+        LocalStorageService.setItem(VIEWED_QUOTES_KEY, viewedQuotes);
+        
+        // After resetting, get all quotes of the category
+        categoryFilteredQuotes = this.quotes.filter(quote => quote.category === currentCategory);
+      } else {
+        // If no category is specified and all quotes are viewed, reset all viewed quotes
+        LocalStorageService.removeItem(VIEWED_QUOTES_KEY);
+        categoryFilteredQuotes = this.quotes;
+      }
+    }
+
+    if (categoryFilteredQuotes.length === 0) {
+      return null; // No quotes available at all
     }
 
     const randomIndex = Math.floor(Math.random() * categoryFilteredQuotes.length);

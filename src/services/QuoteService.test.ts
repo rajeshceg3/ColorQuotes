@@ -3,8 +3,28 @@ import { QuoteService } from './QuoteService';
 import { LocalStorageService } from './LocalStorageService';
 import { Quote, QuoteCategory } from '../types';
 
-// Mock LocalStorageService
-jest.mock('./LocalStorageService');
+jest.mock('../data/quotes.json', () => ({
+  quotes: [
+    { id: '1', text: 'Quote 1', author: 'Author 1', category: 'motivational', source: 'Source 1', verified: true, created_at: '2023-01-01T00:00:00Z', updated_at: '2023-01-01T00:00:00Z', language: 'en', character_count: 10, tags: ['tag1'] },
+    { id: '2', text: 'Quote 2', author: 'Author 2', category: 'wisdom', source: 'Source 2', verified: true, created_at: '2023-01-01T00:00:00Z', updated_at: '2023-01-01T00:00:00Z', language: 'en', character_count: 10, tags: ['tag2'] },
+    { id: '3', text: 'Quote 3', author: 'Author 3', category: 'motivational', source: 'Source 3', verified: true, created_at: '2023-01-01T00:00:00Z', updated_at: '2023-01-01T00:00:00Z', language: 'en', character_count: 10, tags: ['tag3'] },
+    { id: '4', text: 'Quote 4', author: 'Author 4', category: 'happiness', source: 'Source 4', verified: true, created_at: '2023-01-01T00:00:00Z', updated_at: '2023-01-01T00:00:00Z', language: 'en', character_count: 10, tags: ['tag4'] },
+  ],
+  metadata: {
+    total_quotes: 4,
+    last_updated: '2024-01-01T00:00:00Z',
+    version: '1.0',
+    categories: {
+        'motivational': 2,
+        'wisdom': 1,
+        'happiness': 1,
+        'creativity': 0,
+        'leadership': 0,
+        'perseverance': 0,
+        'general': 0,
+    }
+  }
+}));
 
 const mockQuotes: Quote[] = [
   { id: '1', text: 'Quote 1', author: 'Author 1', category: QuoteCategory.MOTIVATIONAL, source: 'Source 1', verified: true, created_at: '2023-01-01T00:00:00Z', updated_at: '2023-01-01T00:00:00Z', language: 'en', character_count: 10, tags: ['tag1'] },
@@ -13,25 +33,8 @@ const mockQuotes: Quote[] = [
   { id: '4', text: 'Quote 4', author: 'Author 4', category: QuoteCategory.HAPPINESS, source: 'Source 4', verified: true, created_at: '2023-01-01T00:00:00Z', updated_at: '2023-01-01T00:00:00Z', language: 'en', character_count: 10, tags: ['tag4'] },
 ];
 
-// Mock the data module
-jest.mock('../data/quotes.json', () => ({
-  quotes: mockQuotes,
-  metadata: {
-    total_quotes: mockQuotes.length,
-    last_updated: '2024-01-01T00:00:00Z',
-    version: '1.0',
-    categories: {
-        [QuoteCategory.MOTIVATIONAL]: 2,
-        [QuoteCategory.WISDOM]: 1,
-        [QuoteCategory.HAPPINESS]: 1,
-        [QuoteCategory.CREATIVITY]: 0,
-        [QuoteCategory.LEADERSHIP]: 0,
-        [QuoteCategory.PERSEVERANCE]: 0,
-        [QuoteCategory.GENERAL]: 0,
-    }
-  }
-}), { virtual: true });
-
+// Mock LocalStorageService
+jest.mock('./LocalStorageService');
 
 describe('QuoteService', () => {
   let quoteService: QuoteService;
@@ -44,14 +47,7 @@ describe('QuoteService', () => {
     mockSetItem = jest.spyOn(LocalStorageService, 'setItem');
 
     // Ensure a fresh instance of QuoteService for each test
-    // This requires a way to reset the singleton instance or use a non-singleton for testing
-    // For simplicity, we'll rely on jest.resetModules() if issues arise, or modify service for testability
-    // Or, we can access the private constructor for testing or use a 'resetInstance' method if added.
-    // For now, we will get a new instance each time.
     quoteService = QuoteService.getInstance();
-    // Since QuoteService is a singleton and loads data in constructor,
-    // we need to ensure mocks are in place *before* the first getInstance call.
-    // Jest's hoisting of `jest.mock` should handle this.
   });
 
   afterEach(() => {
