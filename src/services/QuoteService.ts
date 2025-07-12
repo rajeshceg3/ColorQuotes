@@ -59,17 +59,19 @@ export class QuoteService {
       if (categoryAvailableQuotes.length > 0) {
         quotesToConsider = categoryAvailableQuotes;
       } else {
-        // 4. If categoryAvailableQuotes is empty
-        if (availableQuotesGlobal.length > 0) {
-          // Quotes are available globally but not in this category
-          return null;
-        } else {
-          // All quotes (globally) have been recently viewed. Reset all viewedQuotes.
-          LocalStorageService.removeItem(VIEWED_QUOTES_KEY);
-          viewedQuotes = {}; // Reset local copy for current operation
-          // Select from all quotes of the current category after reset
-          quotesToConsider = this.quotes.filter(quote => quote.category === currentCategory);
-        }
+        // If no quotes in the category are available, reset viewed for that category and retry
+        const categoryQuotes = this.quotes.filter(q => q.category === currentCategory);
+
+        // Reset viewed quotes for this category by removing them from the viewedQuotes object
+        categoryQuotes.forEach(q => {
+          delete viewedQuotes[q.id];
+        });
+
+        // Persist the changes to viewedQuotes (optional, but good for consistency)
+        LocalStorageService.setItem(VIEWED_QUOTES_KEY, viewedQuotes);
+
+        // Now, all quotes in the category are available again
+        quotesToConsider = categoryQuotes;
       }
     } else {
       // No currentCategory provided

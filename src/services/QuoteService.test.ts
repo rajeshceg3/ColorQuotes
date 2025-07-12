@@ -109,21 +109,28 @@ describe('QuoteService', () => {
       expect(value[quote!.id]).toBeDefined();
     });
 
-    it('should return null if all quotes are recently viewed or filtered out', () => {
-      const now = new Date();
-      const allRecentlyViewed = {
-        [mockQuotes[0].id]: now.toISOString(),
-        [mockQuotes[1].id]: now.toISOString(),
-        [mockQuotes[2].id]: now.toISOString(),
+    it('should reset viewed quotes for a category if all have been seen and return a quote', () => {
+      // Mark all quotes in the 'motivational' category as recently viewed
+      const now = new Date().toISOString();
+      const viewedQuotes = {
+        '1': now, // motivational
+        '3': now, // motivational
       };
-      mockGetItem.mockReturnValue(allRecentlyViewed);
-      // Get a quote from a category that only has one item, and that item is viewed
-      const quote = quoteService.getRandomQuote(QuoteCategory.WISDOM); // Quote ID '2'
-       //This test needs refinement. If quote '2' (Wisdom) is viewed, and we ask for Wisdom, it should be null
-      const viewedForWisdom = { [mockQuotes[1].id]: new Date().toISOString() };
-      mockGetItem.mockReturnValue(viewedForWisdom);
-      const wisdomQuote = quoteService.getRandomQuote(QuoteCategory.WISDOM);
-      expect(wisdomQuote).toBeNull();
+      mockGetItem.mockReturnValue(viewedQuotes);
+
+      // Request a quote from the 'motivational' category
+      const quote = quoteService.getRandomQuote(QuoteCategory.MOTIVATIONAL);
+
+      // Expect that a quote is returned, because the viewed quotes for the category should be reset
+      expect(quote).not.toBeNull();
+      expect(quote?.category).toBe(QuoteCategory.MOTIVATIONAL);
+
+      // Also, check that the setItem call was made to update the viewed quotes list,
+      // reflecting the reset. The new list should contain only the newly selected quote.
+      const [key, value] = mockSetItem.mock.calls[mockSetItem.mock.calls.length - 1];
+      expect(key).toBe('viewedQuotes');
+      expect(Object.keys(value).length).toBe(1);
+      expect(value[quote!.id]).toBeDefined();
     });
 
      it('should clean up very old entries from localStorage', () => {
