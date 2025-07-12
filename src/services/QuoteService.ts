@@ -36,59 +36,69 @@ export class QuoteService {
   }
 
   public getRandomQuote(currentCategory?: QuoteCategory): Quote | null {
-    const viewedQuotes = LocalStorageService.getItem<ViewedQuotes>(VIEWED_QUOTES_KEY) || {};
+    let viewedQuotes = LocalStorageService.getItem<ViewedQuotes>(VIEWED_QUOTES_KEY) || {};
     const now = new Date().getTime();
 
-    // Filter out recently viewed quotes
-    const availableQuotes = this.quotes.filter(quote => {
+    // 1. Filter all quotes by "not recently viewed"
+    let availableQuotesGlobal = this.quotes.filter(quote => {
       const viewedTimestamp = viewedQuotes[quote.id];
       if (viewedTimestamp) {
-        const viewedDate = new Date(viewedTimestamp).getTime();
-        if (now - viewedDate < TWENTY_FOUR_HOURS_MS) {
-          return false; // Recently viewed
-        }
+        return now - new Date(viewedTimestamp).getTime() >= TWENTY_FOUR_HOURS_MS;
       }
       return true;
     });
 
-    let categoryFilteredQuotes = currentCategory
-      ? availableQuotes.filter(quote => quote.category === currentCategory)
-      : availableQuotes;
+    let quotesToConsider: Quote[];
 
-    if (categoryFilteredQuotes.length === 0) {
-      // If no quotes are available after filtering, reset the viewed quotes for the given category
-      if (currentCategory) {
-        const viewedQuotes = LocalStorageService.getItem<ViewedQuotes>(VIEWED_QUOTES_KEY) || {};
-        this.quotes.forEach(quote => {
-          if (quote.category === currentCategory) {
-            delete viewedQuotes[quote.id];
-          }
-        });
-        LocalStorageService.setItem(VIEWED_QUOTES_KEY, viewedQuotes);
-        
-        // After resetting, get all quotes of the category
-        categoryFilteredQuotes = this.quotes.filter(quote => quote.category === currentCategory);
+    if (currentCategory) {
+      // 2. If a currentCategory is provided, further filter availableQuotesGlobal
+      const categoryAvailableQuotes = availableQuotesGlobal.filter(
+        quote => quote.category === currentCategory
+      );
+
+      if (categoryAvailableQuotes.length > 0) {
+        quotesToConsider = categoryAvailableQuotes;
       } else {
-        // If no category is specified and all quotes are viewed, reset all viewed quotes
+        // 4. If categoryAvailableQuotes is empty
+        if (availableQuotesGlobal.length > 0) {
+          // Quotes are available globally but not in this category
+          return null;
+        } else {
+          // All quotes (globally) have been recently viewed. Reset all viewedQuotes.
+          LocalStorageService.removeItem(VIEWED_QUOTES_KEY);
+          viewedQuotes = {}; // Reset local copy for current operation
+          // Select from all quotes of the current category after reset
+          quotesToConsider = this.quotes.filter(quote => quote.category === currentCategory);
+        }
+      }
+    } else {
+      // No currentCategory provided
+      if (availableQuotesGlobal.length > 0) {
+        quotesToConsider = availableQuotesGlobal;
+      } else {
+        // 5. All quotes globally viewed, and no category specified. Reset all.
         LocalStorageService.removeItem(VIEWED_QUOTES_KEY);
-        categoryFilteredQuotes = this.quotes;
+        viewedQuotes = {}; // Reset local copy
+        quotesToConsider = this.quotes; // Consider all quotes after reset
       }
     }
 
-    if (categoryFilteredQuotes.length === 0) {
-      return null; // No quotes available at all
+    if (quotesToConsider.length === 0) {
+      // This should ideally not happen if reset logic is correct,
+      // unless the initial quotes list for a category is empty.
+      return null;
     }
 
-    const randomIndex = Math.floor(Math.random() * categoryFilteredQuotes.length);
-    const selectedQuote = categoryFilteredQuotes[randomIndex];
+    const randomIndex = Math.floor(Math.random() * quotesToConsider.length);
+    const selectedQuote = quotesToConsider[randomIndex];
 
     if (selectedQuote) {
       // Record viewed quote
       viewedQuotes[selectedQuote.id] = new Date().toISOString();
-      // Clean up old entries (older than 24 hours - though they are filtered anyway)
-      // More aggressive cleanup might remove entries older than, say, 7 days
+      // Clean up old entries (older than 7 days)
+      // This cleanup is less critical now with the stricter availability logic, but good for hygiene
       for (const quoteId in viewedQuotes) {
-        if (now - new Date(viewedQuotes[quoteId]).getTime() > TWENTY_FOUR_HOURS_MS * 7) { // Clean up after 7 days
+        if (now - new Date(viewedQuotes[quoteId]).getTime() > TWENTY_FOUR_HOURS_MS * 7) {
           delete viewedQuotes[quoteId];
         }
       }

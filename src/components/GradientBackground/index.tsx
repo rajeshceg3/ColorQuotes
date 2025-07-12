@@ -61,24 +61,53 @@ const GradientBackground: React.FC<{ children: React.ReactNode }> = ({ children 
 
     if (activeBgRef.current === 1) {
       const newDef2 = gradientService.generateGradient(bg1DefForExclusion);
-      if (newDef2) { // Only update if a new gradient is found
+      const currentDef2 = currentBg2DefRef.current;
+
+      // Check if newDef2 is meaningfully different from currentDef2 or if newDef2 is not null and currentDef2 was
+      const isDifferent = newDef2 &&
+                          (!currentDef2 ||
+                           newDef2.angle !== currentDef2.angle ||
+                           newDef2.colors.join(',') !== currentDef2.colors.join(','));
+
+      if (isDifferent) {
+        setCurrentBg2Def(newDef2); // newDef2 is guaranteed to be non-null here
+        setBg2Classes(GradientService.formatGradientToTailwind(newDef2!)); // Use non-null assertion
+        setBg1Opacity(0);
+        setBg2Opacity(1);
+        activeBgRef.current = 2;
+      } else if (newDef2 && !currentDef2) {
+        // This case handles if currentDef2 was null and newDef2 is the first valid gradient
         setCurrentBg2Def(newDef2);
         setBg2Classes(GradientService.formatGradientToTailwind(newDef2));
+        setBg1Opacity(0);
+        setBg2Opacity(1);
+        activeBgRef.current = 2;
       }
-      // If newDef2 is null, bg2Classes retains its previous value.
-      // The fade will still happen, potentially to the same gradient if no new one was found.
-      setBg1Opacity(0);
-      setBg2Opacity(1);
-      activeBgRef.current = 2;
-    } else {
+      // If newDef2 is null or same as currentDef2, do nothing, no transition
+    } else { // activeBgRef.current === 2
       const newDef1 = gradientService.generateGradient(bg2DefForExclusion);
-      if (newDef1) {
+      const currentDef1 = currentBg1DefRef.current;
+
+      const isDifferent = newDef1 &&
+                          (!currentDef1 ||
+                           newDef1.angle !== currentDef1.angle ||
+                           newDef1.colors.join(',') !== currentDef1.colors.join(','));
+
+      if (isDifferent) {
+        setCurrentBg1Def(newDef1); // newDef1 is guaranteed to be non-null here
+        setBg1Classes(GradientService.formatGradientToTailwind(newDef1!)); // Use non-null assertion
+        setBg1Opacity(1);
+        setBg2Opacity(0);
+        activeBgRef.current = 1;
+      } else if (newDef1 && !currentDef1) {
+        // This case handles if currentDef1 was null and newDef1 is the first valid gradient
         setCurrentBg1Def(newDef1);
         setBg1Classes(GradientService.formatGradientToTailwind(newDef1));
+        setBg1Opacity(1);
+        setBg2Opacity(0);
+        activeBgRef.current = 1;
       }
-      setBg1Opacity(1);
-      setBg2Opacity(0);
-      activeBgRef.current = 1;
+      // If newDef1 is null or same as currentDef1, do nothing, no transition
     }
   }, [gradientService, setCurrentBg1Def, setBg1Classes, setCurrentBg2Def, setBg2Classes, setBg1Opacity, setBg2Opacity, activeBgRef]);
 
