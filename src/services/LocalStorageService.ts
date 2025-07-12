@@ -29,8 +29,13 @@ export class LocalStorageService {
       return JSON.parse(serializedValue) as T;
     } catch (error) {
       console.error(`Error getting item ${key} from localStorage:`, error);
-      // It might be beneficial to remove the corrupted item
-      // localStorage.removeItem(key);
+      // Remove the corrupted item to prevent future errors
+      try {
+        localStorage.removeItem(key);
+        console.warn(`Removed corrupted item ${key} from localStorage.`);
+      } catch (removeError) {
+        console.error(`Error removing corrupted item ${key} from localStorage:`, removeError);
+      }
       return null;
     }
   }
