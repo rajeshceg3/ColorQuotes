@@ -3,7 +3,7 @@ import { GradientService, GradientDefinition } from '../../services/GradientServ
 import { getReducedMotionDuration } from '../../utils/motion';
 
 // interface GradientDef { type: string; angle: string; colors: string[]; } // Removed, use GradientDefinition
-const BASE_GRADIENT_TRANSITION_DURATION = 1500;
+const BASE_GRADIENT_TRANSITION_DURATION = 2000;
 const GRADIENT_CHANGE_INTERVAL = 15000;
 
 // const allGradients: GradientDef[] = gradientData.gradients; // Removed
