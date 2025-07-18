@@ -3,87 +3,87 @@
     {
       "type": "linear",
       "angle": "bg-gradient-to-br",
-      "colors": ["from-pastel-pink-1", "to-pastel-purple-3"]
+      "colors": ["from-ive-blue-1", "to-ive-teal-2"]
     },
     {
       "type": "linear",
       "angle": "bg-gradient-to-r",
-      "colors": ["from-pastel-green-1", "to-pastel-blue-3"]
+      "colors": ["from-ive-green-1", "to-ive-yellow-2"]
     },
     {
       "type": "linear",
       "angle": "bg-gradient-to-tl",
-      "colors": ["from-pastel-yellow-1", "via-pastel-yellow-2", "to-pastel-pink-3"]
+      "colors": ["from-ive-orange-1", "via-ive-pink-2", "to-ive-purple-1"]
     },
     {
       "type": "linear",
       "angle": "bg-gradient-to-b",
-      "colors": ["from-pastel-blue-2", "to-pastel-purple-1"]
+      "colors": ["from-ive-indigo-1", "to-ive-blue-2"]
     },
     {
       "type": "linear",
       "angle": "bg-gradient-to-tr",
-      "colors": ["from-pastel-green-2", "via-pastel-green-1", "to-pastel-yellow-3"]
+      "colors": ["from-ive-red-1", "via-ive-orange-2", "to-ive-yellow-1"]
     },
     {
       "type": "linear",
       "angle": "bg-gradient-to-l",
-      "colors": ["from-pastel-pink-2", "to-pastel-yellow-1"]
+      "colors": ["from-ive-pink-1", "to-ive-purple-2"]
     },
     {
       "type": "linear",
       "angle": "bg-gradient-to-bl",
-      "colors": ["from-pastel-purple-1", "via-pastel-purple-2", "to-pastel-green-3"]
+      "colors": ["from-ive-teal-1", "via-ive-green-2", "to-ive-blue-1"]
     },
     {
       "type": "linear",
       "angle": "bg-gradient-to-t",
-      "colors": ["from-pastel-blue-1", "to-pastel-pink-2"]
+      "colors": ["from-ive-purple-1", "to-ive-indigo-2"]
     },
     {
       "type": "linear",
       "angle": "bg-gradient-to-r",
-      "colors": ["from-pastel-yellow-2", "via-pastel-green-2", "to-pastel-blue-3"]
+      "colors": ["from-ive-yellow-1", "via-ive-green-2", "to-ive-teal-1"]
     },
     {
       "type": "linear",
       "angle": "bg-gradient-to-b",
-      "colors": ["from-pastel-pink-1", "via-pastel-purple-3", "to-pastel-yellow-2"]
+      "colors": ["from-ive-pink-1", "via-ive-red-2", "to-ive-orange-1"]
     },
     {
       "type": "linear",
       "angle": "bg-gradient-to-tr",
-      "colors": ["from-pastel-green-1", "to-pastel-purple-2"]
+      "colors": ["from-ive-green-1", "to-ive-indigo-2"]
     },
     {
       "type": "linear",
       "angle": "bg-gradient-to-bl",
-      "colors": ["from-pastel-blue-3", "via-pastel-pink-1", "to-pastel-green-2"]
+      "colors": ["from-ive-blue-2", "via-ive-purple-1", "to-ive-pink-2"]
     },
     {
       "type": "linear",
       "angle": "bg-gradient-to-t",
-      "colors": ["from-pastel-yellow-3", "to-pastel-purple-1"]
+      "colors": ["from-ive-yellow-2", "to-ive-red-1"]
     },
     {
       "type": "linear",
       "angle": "bg-gradient-to-r",
-      "colors": ["from-pastel-pink-3", "to-pastel-green-1"]
+      "colors": ["from-ive-red-2", "to-ive-green-1"]
     },
     {
       "type": "linear",
       "angle": "bg-gradient-to-br",
-      "colors": ["from-pastel-blue-1", "via-pastel-yellow-3", "to-pastel-purple-2"]
+      "colors": ["from-ive-indigo-1", "via-ive-yellow-2", "to-ive-purple-1"]
     },
     {
-      "type": "linear",
+      "type":f "linear",
       "angle": "bg-gradient-to-tl",
-      "colors": ["from-pastel-green-3", "to-pastel-pink-2"]
+      "colors": ["from-ive-green-2", "to-ive-pink-1"]
     },
     {
       "type": "linear",
       "angle": "bg-gradient-to-b",
-      "colors": ["from-pastel-purple-3", "via-pastel-blue-2", "to-pastel-yellow-1"]
+      "colors": ["from-ive-purple-2", "via-ive-blue-1", "to-ive-yellow-1"]
     }
   ]
 }

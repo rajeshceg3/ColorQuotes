@@ -2,10 +2,12 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Quote, QuoteCategory } from '../../types'; // Added QuoteCategory
 import { QuoteService } from '../../services/QuoteService'; // Import QuoteService
 import { getReducedMotionDuration } from '../../utils/motion';
+import FavoriteIcon from '../Icons/FavoriteIcon';
+import CopyIcon from '../Icons/CopyIcon';
 import './QuoteDisplay.css';
 
 const QUOTE_ROTATION_INTERVAL = 30000; // 30 seconds
-const BASE_QUOTE_FADE_DURATION = 800;
+const BASE_QUOTE_FADE_DURATION = 1200;
 
 const quoteService = QuoteService.getInstance(); // Instantiate service
 
@@ -127,42 +129,14 @@ const QuoteDisplay: React.FC = () => {
 
   return (
     <div
-      className="relative text-center w-full max-w-[600px] p-4 pt-8 bg-muted-dark-canvas rounded-lg cursor-pointer
-                 transition-transform transform hover:scale-105 active:scale-100
-                 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-75"
-      style={{ minHeight: '250px' }} // Increased minHeight for icons
+      className="relative text-center w-full max-w-[600px] p-4 cursor-pointer"
+      style={{ minHeight: '250px' }}
       onClick={handleInteraction}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleInteraction(); } }}
       aria-label="Display next quote"
     >
-      {/* Icons Container */}
-      <div className="absolute top-2 right-2 flex space-x-2">
-        <button
-          onClick={handleToggleFavorite}
-          aria-label={isFavorited ? "Unfavorite this quote" : "Favorite this quote"}
-          className="p-2 text-2xl text-white hover:text-yellow-400 focus:outline-none focus:ring-1 focus:ring-yellow-400 rounded-full"
-          aria-pressed={isFavorited}
-        >
-          {isFavorited ? '★' : '☆'}
-        </button>
-        <div className="relative">
-          <button
-            onClick={handleCopyQuote}
-            aria-label="Copy quote and author"
-            className="p-2 text-xl text-white hover:text-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400 rounded-full"
-          >
-            📋
-          </button>
-          {showCopyTooltip && (
-            <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-700 text-white text-xs rounded-md">
-              Copied!
-            </div>
-          )}
-        </div>
-      </div>
-
       <div
         style={{
           opacity: isQuoteVisible ? 1 : 0,
@@ -174,14 +148,14 @@ const QuoteDisplay: React.FC = () => {
         {currentQuote ? (
           <>
             <p
-              className="text-quote-sm sm:text-quote-md lg:text-quote-lg font-light text-white font-serif"
-              style={{ lineHeight: 1.4, marginTop: '20px' }} // Added marginTop to avoid overlap with icons
+              className="text-2xl sm:text-3xl lg:text-4xl font-light text-white"
+              style={{ lineHeight: 1.5, textShadow: '0 1px 3px rgba(0,0,0,0.1)' }}
             >
               "{currentQuote.text}"
             </p>
             <p
-              className="mt-6 text-attrib-sm sm:text-attrib-md lg:text-attrib-lg font-medium text-white font-serif"
-              style={{ marginTop: '20px' }}
+              className="mt-6 text-lg sm:text-xl lg:text-2xl font-medium text-white"
+              style={{ textShadow: '0 1px 3px rgba(0,0,0,0.1)' }}
             >
               - {currentQuote.author}
             </p>
@@ -191,6 +165,19 @@ const QuoteDisplay: React.FC = () => {
              <p className="text-transparent">&nbsp;</p>
           </div>
         )}
+      </div>
+
+      {/* Icons Container */}
+      <div className="absolute bottom-4 right-4 flex space-x-2">
+        <FavoriteIcon isFavorited={isFavorited} onClick={handleToggleFavorite} />
+        <div className="relative">
+          <CopyIcon onClick={handleCopyQuote} />
+          {showCopyTooltip && (
+            <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-700 text-white text-xs rounded-md">
+              Copied!
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
