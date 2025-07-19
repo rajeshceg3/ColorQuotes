@@ -86,6 +86,11 @@ export class QuoteService {
     }
 
     if (quotesToConsider.length === 0) {
+      // This should ideally not happen, but as a fallback, use all quotes.
+      quotesToConsider = this.quotes;
+    }
+
+    if (quotesToConsider.length === 0) {
       // This should ideally not happen if reset logic is correct,
       // unless the initial quotes list for a category is empty.
       return null;
