@@ -1,6 +1,13 @@
 // src/services/GradientService.test.ts
 import { GradientService, GradientDefinition } from './GradientService';
 
+jest.mock('../data/gradients.json', () => ({
+  gradients: [
+    { type: 'linear', angle: 'bg-gradient-to-r', colors: ['from-red-500', 'to-blue-500'] },
+    { type: 'linear', angle: 'bg-gradient-to-b', colors: ['from-green-500', 'to-yellow-500'] },
+  ],
+}));
+
 jest.mock('../../data/gradients.json', () => ({
   gradients: [
     { type: 'linear', angle: 'bg-gradient-to-r', colors: ['from-red-500', 'to-blue-500'] },
