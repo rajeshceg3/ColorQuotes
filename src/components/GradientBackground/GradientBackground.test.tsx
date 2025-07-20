@@ -5,8 +5,19 @@ import GradientBackground from './index';
 import * as motionUtils from '../../utils/motion'; // Import like this to mock specific functions
 import { GradientService } from '../../services/GradientService';
 
+const mockGenerateGradient = jest.fn();
 // Mock the GradientService
-jest.mock('../../services/GradientService');
+jest.mock('../../services/GradientService', () => ({
+  GradientService: {
+    getInstance: () => ({
+      generateGradient: mockGenerateGradient,
+    }),
+    formatGradientToTailwind: (gradient: any) => {
+      if (!gradient) return '';
+      return `${gradient.angle} ${gradient.colors.join(' ')}`;
+    },
+  },
+}));
 
 const mockGradients = [
   { type: "linear", angle: "bg-gradient-to-br", colors: ["from-pink-300", "to-purple-300"] },
@@ -16,25 +27,15 @@ const mockGradients = [
 
 describe('GradientBackground Component', () => {
   let getReducedMotionDurationMock: jest.SpyInstance;
-  let mockGenerateGradient: jest.Mock;
 
   beforeEach(() => {
     jest.useFakeTimers();
 
-    // Mock GradientService implementation
-    mockGenerateGradient = jest.fn()
+    // Reset mock for each test
+    mockGenerateGradient.mockClear()
       .mockReturnValueOnce(mockGradients[0])
       .mockReturnValueOnce(mockGradients[1])
       .mockReturnValue(mockGradients[2]);
-
-    (GradientService.getInstance as jest.Mock).mockReturnValue({
-      generateGradient: mockGenerateGradient,
-    });
-
-    (GradientService.formatGradientToTailwind as jest.Mock) = jest.fn(gradient => {
-        if (!gradient) return '';
-        return `${gradient.angle} ${gradient.colors.join(' ')}`;
-    });
 
     // Mock getReducedMotionDuration
     getReducedMotionDurationMock = jest.spyOn(motionUtils, 'getReducedMotionDuration')

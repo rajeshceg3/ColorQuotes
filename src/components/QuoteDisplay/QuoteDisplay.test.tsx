@@ -5,8 +5,18 @@ import QuoteDisplay from './index';
 import * as motionUtils from '../../utils/motion'; // Import like this to mock specific functions
 import { QuoteService } from '../../services/QuoteService';
 
+const mockGetRandomQuote = jest.fn();
 // Mock the QuoteService
-jest.mock('../../services/QuoteService');
+jest.mock('../../services/QuoteService', () => ({
+  QuoteService: {
+    getInstance: () => ({
+      getRandomQuote: mockGetRandomQuote,
+      isQuoteFavorited: jest.fn().mockReturnValue(false),
+      addFavorite: jest.fn(),
+      removeFavorite: jest.fn(),
+    }),
+  },
+}));
 
 const mockQuotes = [
   { id: '1', text: 'Test Quote 1', author: 'Author 1', category: 'wisdom', character_count: 10, tags:[], verified: true, source: 'test' },
@@ -17,23 +27,15 @@ const mockQuotes = [
 describe('QuoteDisplay Component', () => {
   let getReducedMotionDurationMock: jest.SpyInstance;
   let matchMediaMock: jest.SpyInstance;
-  let mockGetRandomQuote: jest.Mock;
 
   beforeEach(() => {
     jest.useFakeTimers();
 
-    // Mock QuoteService implementation
-    mockGetRandomQuote = jest.fn()
+    // Reset mock for each test
+    mockGetRandomQuote.mockClear()
       .mockReturnValueOnce(mockQuotes[0])
       .mockReturnValueOnce(mockQuotes[1])
       .mockReturnValue(mockQuotes[2]);
-
-    (QuoteService.getInstance as jest.Mock).mockReturnValue({
-      getRandomQuote: mockGetRandomQuote,
-      isQuoteFavorited: jest.fn().mockReturnValue(false),
-      addFavorite: jest.fn(),
-      removeFavorite: jest.fn(),
-    });
 
     // Mock getReducedMotionDuration
     getReducedMotionDurationMock = jest.spyOn(motionUtils, 'getReducedMotionDuration')

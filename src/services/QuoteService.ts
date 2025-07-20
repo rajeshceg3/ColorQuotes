@@ -90,12 +90,6 @@ export class QuoteService {
       quotesToConsider = this.quotes;
     }
 
-    if (quotesToConsider.length === 0) {
-      // This should ideally not happen if reset logic is correct,
-      // unless the initial quotes list for a category is empty.
-      return null;
-    }
-
     const randomIndex = Math.floor(Math.random() * quotesToConsider.length);
     const selectedQuote = quotesToConsider[randomIndex];
 
