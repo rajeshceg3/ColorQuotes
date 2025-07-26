@@ -3,8 +3,6 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import QuoteDisplay from './index';
 import * as motionUtils from '../../utils/motion'; // Import like this to mock specific functions
-import { QuoteService } from '../../services/QuoteService';
-
 const mockGetRandomQuote = jest.fn();
 // Mock the QuoteService
 jest.mock('../../services/QuoteService', () => ({
@@ -25,9 +23,6 @@ const mockQuotes = [
 ];
 
 describe('QuoteDisplay Component', () => {
-  let getReducedMotionDurationMock: jest.SpyInstance;
-  let matchMediaMock: jest.SpyInstance;
-
   beforeEach(() => {
     jest.useFakeTimers();
 

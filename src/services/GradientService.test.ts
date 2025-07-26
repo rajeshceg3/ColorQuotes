@@ -1,4 +1,3 @@
-// src/services/GradientService.test.ts
 import { GradientService, GradientDefinition } from './GradientService';
 
 jest.mock('../data/gradients.json', () => ({
@@ -16,17 +15,8 @@ jest.mock('../../data/gradients.json', () => ({
   ]
 }));
 
-const mockGradients: GradientDefinition[] = [
-  { type: 'linear', angle: 'bg-gradient-to-r', colors: ['from-red-500', 'to-blue-500'] },
-  { type: 'linear', angle: 'bg-gradient-to-b', colors: ['from-green-500', 'to-yellow-500'] },
-  { type: 'linear', angle: 'bg-gradient-to-l', colors: ['from-purple-500', 'to-pink-500'] },
-];
-
-
-
 describe('GradientService', () => {
-  let GradientService: any;
-  let gradientService: any;
+  let gradientService: GradientService;
   const mockGradients: GradientDefinition[] = [
     { type: 'linear', angle: 'bg-gradient-to-r', colors: ['from-red-500', 'to-blue-500'] },
     { type: 'linear', angle: 'bg-gradient-to-b', colors: ['from-green-500', 'to-yellow-500'] },
@@ -35,8 +25,7 @@ describe('GradientService', () => {
 
   beforeEach(async () => {
     const module = await import('./GradientService');
-    GradientService = module.GradientService;
-    gradientService = GradientService.getInstance();
+    gradientService = module.GradientService.getInstance();
   });
 
   afterEach(() => {
@@ -74,7 +63,7 @@ describe('GradientService', () => {
 
       // Modify the internal state of the 'gradientService' instance from beforeEach.
       // This instance is configured by default with mockGradients.
-      (gradientService as any).gradients = [singleGradientMockItem];
+      (gradientService as unknown as { gradients: GradientDefinition[] }).gradients = [singleGradientMockItem];
 
       // Call the original method on the modified instance,
       // providing the single existing gradient as the current one.
@@ -84,7 +73,7 @@ describe('GradientService', () => {
 
     it('should return null if no gradients are available', () => {
         const serviceWithNoGradients = GradientService.getInstance();
-        (serviceWithNoGradients as any).gradients = []; // Set to empty
+        (serviceWithNoGradients as unknown as { gradients: GradientDefinition[] }).gradients = []; // Set to empty
         const gradient = serviceWithNoGradients.generateGradient();
         expect(gradient).toBeNull();
     });
@@ -92,7 +81,7 @@ describe('GradientService', () => {
     it('should return the gradient if only one is available, regardless of currentGradient', () => {
         // Using the 'gradientService' instance from beforeEach for consistency.
         const singleGradient = { type: 'linear', angle: 'bg-gradient-to-r', colors: ['from-single-1', 'to-single-2'] };
-        (gradientService as any).gradients = [singleGradient]; // Modify the instance from beforeEach
+        (gradientService as unknown as { gradients: GradientDefinition[] }).gradients = [singleGradient]; // Modify the instance from beforeEach
 
         const currentOther = { type: 'linear', angle: 'bg-gradient-to-b', colors: ['from-other-1', 'to-other-2'] };
         let gradient = gradientService.generateGradient(currentOther);
@@ -126,8 +115,8 @@ describe('GradientService', () => {
     });
 
     it('should return an empty string if gradient is null or undefined', () => {
-      expect(GradientService.formatGradientToTailwind(null as any)).toBe('');
-      expect(GradientService.formatGradientToTailwind(undefined as any)).toBe('');
+      expect(GradientService.formatGradientToTailwind(null as unknown as GradientDefinition)).toBe('');
+      expect(GradientService.formatGradientToTailwind(undefined as unknown as GradientDefinition)).toBe('');
     });
   });
 });

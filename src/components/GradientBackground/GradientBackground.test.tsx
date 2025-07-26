@@ -3,8 +3,6 @@ import { render, screen, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import GradientBackground from './index';
 import * as motionUtils from '../../utils/motion'; // Import like this to mock specific functions
-import { GradientService } from '../../services/GradientService';
-
 const mockGenerateGradient = jest.fn();
 // Mock the GradientService
 jest.mock('../../services/GradientService', () => ({
@@ -12,7 +10,7 @@ jest.mock('../../services/GradientService', () => ({
     getInstance: () => ({
       generateGradient: mockGenerateGradient,
     }),
-    formatGradientToTailwind: (gradient: any) => {
+    formatGradientToTailwind: (gradient: { angle: string, colors: string[] }) => {
       if (!gradient) return '';
       return `${gradient.angle} ${gradient.colors.join(' ')}`;
     },
@@ -26,8 +24,6 @@ const mockGradients = [
 ];
 
 describe('GradientBackground Component', () => {
-  let getReducedMotionDurationMock: jest.SpyInstance;
-
   beforeEach(() => {
     jest.useFakeTimers();
 

@@ -36,11 +36,11 @@ export class QuoteService {
   }
 
   public getRandomQuote(currentCategory?: QuoteCategory): Quote | null {
-    let viewedQuotes = LocalStorageService.getItem<ViewedQuotes>(VIEWED_QUOTES_KEY) || {};
+    const viewedQuotes = LocalStorageService.getItem<ViewedQuotes>(VIEWED_QUOTES_KEY) || {};
     const now = new Date().getTime();
 
     // 1. Filter all quotes by "not recently viewed"
-    let availableQuotesGlobal = this.quotes.filter(quote => {
+    const availableQuotesGlobal = this.quotes.filter(quote => {
       const viewedTimestamp = viewedQuotes[quote.id];
       if (viewedTimestamp) {
         return now - new Date(viewedTimestamp).getTime() >= TWENTY_FOUR_HOURS_MS;

@@ -51,7 +51,7 @@ describe('LocalStorageService', () => {
     });
 
     it('should log an error if JSON.stringify fails', () => {
-      const circularObj: any = {};
+      const circularObj: { self?: unknown } = {};
       circularObj.self = circularObj;
       LocalStorageService.setItem(TEST_KEY, circularObj);
       expect(console.error).toHaveBeenCalled();
