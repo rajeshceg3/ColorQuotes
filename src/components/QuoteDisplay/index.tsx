@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Quote, QuoteCategory } from '../../types'; // Added QuoteCategory
+import { Quote } from '../../types'; // Added QuoteCategory
 import { QuoteService } from '../../services/QuoteService'; // Import QuoteService
 import { getReducedMotionDuration } from '../../utils/motion';
 import FavoriteIcon from '../Icons/FavoriteIcon';
@@ -151,7 +151,7 @@ const QuoteDisplay: React.FC = () => {
               className="text-2xl sm:text-3xl lg:text-4xl font-light text-white"
               style={{ lineHeight: 1.5, textShadow: '0 1px 3px rgba(0,0,0,0.1)' }}
             >
-              "{currentQuote.text}"
+              &quot;{currentQuote.text}&quot;
             </p>
             <p
               className="mt-6 text-lg sm:text-xl lg:text-2xl font-medium text-white"
