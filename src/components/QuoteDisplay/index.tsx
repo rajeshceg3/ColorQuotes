@@ -16,9 +16,11 @@ const QuoteDisplay: React.FC = () => {
   const [isQuoteVisible, setIsQuoteVisible] = useState(true);
   const [isFavorited, setIsFavorited] = useState(false);
   const [showCopyTooltip, setShowCopyTooltip] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const quoteIntervalRef = useRef<number | null>(null);
   const isAnimatingRef = useRef(false);
   const tooltipTimeoutRef = useRef<number | null>(null);
+  const toastTimeoutRef = useRef<number | null>(null);
 
   const quoteFadeDuration = getReducedMotionDuration(BASE_QUOTE_FADE_DURATION);
 
@@ -78,8 +80,21 @@ const QuoteDisplay: React.FC = () => {
       if (tooltipTimeoutRef.current) {
         clearTimeout(tooltipTimeoutRef.current);
       }
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current);
+      }
     };
   }, [animateAndChangeQuote]);
+
+  const showToast = (message: string) => {
+    setToastMessage(message);
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+    toastTimeoutRef.current = window.setTimeout(() => {
+      setToastMessage(null);
+    }, 2000);
+  };
 
   const handleInteraction = () => {
     if (isAnimatingRef.current) return;
@@ -103,8 +118,10 @@ const QuoteDisplay: React.FC = () => {
 
     if (newFavoritedState) {
       quoteService.addFavorite(currentQuote.id);
+      showToast('Favorited!');
     } else {
       quoteService.removeFavorite(currentQuote.id);
+      showToast('Unfavorited');
     }
   };
 
@@ -114,16 +131,10 @@ const QuoteDisplay: React.FC = () => {
     const textToCopy = `"${currentQuote.text}" - ${currentQuote.author}`;
     try {
       await navigator.clipboard.writeText(textToCopy);
-      setShowCopyTooltip(true);
-      if (tooltipTimeoutRef.current) {
-        clearTimeout(tooltipTimeoutRef.current);
-      }
-      tooltipTimeoutRef.current = window.setTimeout(() => {
-        setShowCopyTooltip(false);
-      }, 2000); // Hide tooltip after 2 seconds
+      showToast('Copied!');
     } catch (err) {
       console.error('Failed to copy quote: ', err);
-      // Optionally, show an error tooltip
+      showToast('Failed to copy');
     }
   };
 
@@ -168,17 +179,17 @@ const QuoteDisplay: React.FC = () => {
       </div>
 
       {/* Icons Container */}
-      <div className="absolute bottom-4 right-4 flex space-x-2">
+      <div className="absolute bottom-4 right-4 flex space-x-2 icon-container">
         <FavoriteIcon isFavorited={isFavorited} onClick={handleToggleFavorite} />
-        <div className="relative">
-          <CopyIcon onClick={handleCopyQuote} />
-          {showCopyTooltip && (
-            <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-700 text-white text-xs rounded-md">
-              Copied!
-            </div>
-          )}
-        </div>
+        <CopyIcon onClick={handleCopyQuote} />
       </div>
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="toast-notification">
+          {toastMessage}
+        </div>
+      )}
     </div>
   );
 };
