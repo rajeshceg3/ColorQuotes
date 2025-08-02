@@ -1,68 +1,66 @@
 // src/services/GradientService.ts
-import allGradientsData from '../data/gradients.json'; // Adjusted path
-
-export interface GradientDefinition {
-  type: string;
-  angle: string;
-  colors: string[];
-}
+import { GradientDefinition } from '../types';
 
 export class GradientService {
   private static instance: GradientService;
-  private gradients: GradientDefinition[];
+  private gradients: GradientDefinition[] = [];
 
   private constructor() {
-    this.gradients = allGradientsData.gradients;
+    // Private constructor for singleton
   }
 
-  public static getInstance(): GradientService {
+  private async initialize(): Promise<void> {
+    try {
+      const response = await fetch('/api/gradients');
+      if (!response.ok) {
+        throw new Error('Failed to fetch gradients');
+      }
+      const data = await response.json();
+      this.gradients = data.gradients;
+    } catch (error) {
+      console.error("Error initializing GradientService:", error);
+      this.gradients = []; // Fallback to empty array on error
+    }
+  }
+
+  public static async getInstance(): Promise<GradientService> {
     if (!GradientService.instance) {
-      GradientService.instance = new GradientService();
+      const instance = new GradientService();
+      await instance.initialize();
+      GradientService.instance = instance;
     }
     return GradientService.instance;
   }
 
-  /**
-   * Generates a random gradient definition.
-   * @param currentGradient Optional. If provided, the new gradient will be different from this one, if possible.
-   * @returns A gradient definition object.
-   */
-  public generateGradient(currentGradient?: GradientDefinition): GradientDefinition | null {
-    if (!this.gradients || this.gradients.length === 0) {
-      return null; // No gradients available
+  public generateGradient(currentGradient: GradientDefinition | null = null): GradientDefinition | null {
+    if (this.gradients.length === 0) {
+      return null;
     }
-
     if (this.gradients.length === 1) {
       return this.gradients[0];
     }
 
-    let selectedGradient: GradientDefinition;
-    let attempts = 0;
-    const maxAttempts = this.gradients.length * 2; // Set a reasonable attempt limit
+    let availableGradients = this.gradients;
+    if (currentGradient) {
+      availableGradients = this.gradients.filter(
+        g => g.angle !== currentGradient.angle || g.colors.join(',') !== currentGradient.colors.join(',')
+      );
+    }
 
-    do {
-      const randomIndex = Math.floor(Math.random() * this.gradients.length);
-      selectedGradient = this.gradients[randomIndex];
-      attempts++;
-    } while (
-      currentGradient &&
-      selectedGradient.angle === currentGradient.angle &&
-      selectedGradient.colors.join(',') === currentGradient.colors.join(',') &&
-      attempts < maxAttempts
-    );
+    // If filtering removed all options (e.g., only one gradient existed and it was the current one),
+    // fall back to the full list to ensure a gradient is always returned.
+    if (availableGradients.length === 0) {
+      availableGradients = this.gradients;
+    }
 
-    return selectedGradient;
+    const randomIndex = Math.floor(Math.random() * availableGradients.length);
+    return availableGradients[randomIndex];
   }
 
-  /**
-   * Formats a gradient definition object into Tailwind CSS classes.
-   * @param gradient The gradient definition object.
-   * @returns A string of Tailwind CSS classes.
-   */
   public static formatGradientToTailwind(gradient: GradientDefinition): string {
-    if (!gradient) return '';
-    // Example: "bg-gradient-to-r from-pastel-pink-1 via-pastel-purple-1 to-pastel-blue-1"
-    // The 'colors' array already contains "from-...", "via-...", "to-..." prefixes.
+    if (!gradient) {
+      return '';
+    }
     return `${gradient.angle} ${gradient.colors.join(' ')}`;
   }
 }

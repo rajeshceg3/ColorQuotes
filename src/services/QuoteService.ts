@@ -1,6 +1,5 @@
 // src/services/QuoteService.ts
 import { Quote, QuoteCategory } from '../types';
-import allQuotesData from '../data/quotes.json'; // Adjusted path
 import { LocalStorageService } from './LocalStorageService';
 
 const VIEWED_QUOTES_KEY = 'viewedQuotes';
@@ -14,29 +13,45 @@ const FAVORITED_QUOTES_KEY = 'favoriteQuoteIds';
 
 export class QuoteService {
   private static instance: QuoteService;
-  private quotes: Quote[];
+  private quotes: Quote[] = [];
 
   private constructor() {
-    // Ensure character_count is a number, and dates are strings
-    this.quotes = allQuotesData.quotes.map(q => ({
-      ...q,
-      character_count: Number(q.character_count),
-      // Ensure category is of QuoteCategory type (runtime check might be needed if data is unreliable)
-      category: q.category as QuoteCategory,
-      created_at: String(q.created_at),
-      updated_at: String(q.updated_at),
-    }));
+    // Constructor is now empty, initialization is handled asynchronously.
   }
 
-  public static getInstance(): QuoteService {
+  private async initialize(): Promise<void> {
+    try {
+      const response = await fetch('/api/quotes');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch quotes: ${response.statusText}`);
+      }
+      const allQuotesData = await response.json();
+
+      // Ensure character_count is a number, and dates are strings
+      this.quotes = allQuotesData.quotes.map((q: any) => ({
+        ...q,
+        character_count: Number(q.character_count),
+        category: q.category as QuoteCategory,
+        created_at: String(q.created_at),
+        updated_at: String(q.updated_at),
+      }));
+    } catch (error) {
+      console.error('Error initializing QuoteService:', error);
+      this.quotes = []; // Fallback to empty quotes on error
+    }
+  }
+
+  public static async getInstance(): Promise<QuoteService> {
     if (!QuoteService.instance) {
-      QuoteService.instance = new QuoteService();
+      const instance = new QuoteService();
+      await instance.initialize();
+      QuoteService.instance = instance;
     }
     return QuoteService.instance;
   }
 
   public getRandomQuote(currentCategory?: QuoteCategory): Quote | null {
-    const viewedQuotes = LocalStorageService.getItem<ViewedQuotes>(VIEWED_QUOTES_KEY) || {};
+    let viewedQuotes = LocalStorageService.getItem<ViewedQuotes>(VIEWED_QUOTES_KEY) || {};
     const now = new Date().getTime();
 
     // 1. Filter all quotes by "not recently viewed"

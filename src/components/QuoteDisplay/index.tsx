@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Quote } from '../../types'; // Added QuoteCategory
-import { QuoteService } from '../../services/QuoteService'; // Import QuoteService
+import { Quote } from '../../types';
+import { QuoteService } from '../../services/QuoteService';
 import { getReducedMotionDuration } from '../../utils/motion';
 import FavoriteIcon from '../Icons/FavoriteIcon';
 import CopyIcon from '../Icons/CopyIcon';
@@ -9,40 +9,48 @@ import './QuoteDisplay.css';
 const QUOTE_ROTATION_INTERVAL = 30000; // 30 seconds
 const BASE_QUOTE_FADE_DURATION = 1200;
 
-const quoteService = QuoteService.getInstance(); // Instantiate service
-
 const QuoteDisplay: React.FC = () => {
-  const [currentQuote, setCurrentQuote] = useState<Quote | null>(() => quoteService.getRandomQuote());
+  const [quoteService, setQuoteService] = useState<QuoteService | null>(null);
+  const [currentQuote, setCurrentQuote] = useState<Quote | null>(null);
   const [isQuoteVisible, setIsQuoteVisible] = useState(true);
   const [isFavorited, setIsFavorited] = useState(false);
-  const [showCopyTooltip, setShowCopyTooltip] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const quoteIntervalRef = useRef<number | null>(null);
   const isAnimatingRef = useRef(false);
-  const tooltipTimeoutRef = useRef<number | null>(null);
   const toastTimeoutRef = useRef<number | null>(null);
 
   const quoteFadeDuration = getReducedMotionDuration(BASE_QUOTE_FADE_DURATION);
 
-  // Update isFavorited state when currentQuote changes
+  // Initialize the QuoteService
   useEffect(() => {
-    if (currentQuote) {
+    const initializeService = async () => {
+      const service = await QuoteService.getInstance();
+      setQuoteService(service);
+      setCurrentQuote(service.getRandomQuote());
+    };
+    initializeService();
+  }, []);
+
+  // Update isFavorited state when currentQuote or quoteService changes
+  useEffect(() => {
+    if (currentQuote && quoteService) {
       setIsFavorited(quoteService.isQuoteFavorited(currentQuote.id));
     }
-  }, [currentQuote]);
+  }, [currentQuote, quoteService]);
 
   const changeQuoteContent = useCallback(() => {
+    if (!quoteService) return;
     setCurrentQuote(prevQuote => {
       const newQuote = quoteService.getRandomQuote();
+      // If the new quote is null (e.g., all quotes viewed), keep the last one.
       if (newQuote === null && prevQuote !== null) {
         return prevQuote;
       }
       return newQuote;
     });
-  }, []);
+  }, [quoteService]);
 
   const animateAndChangeQuote = useCallback((isTriggeredByTimer: boolean = false) => {
-    // Prevent starting a new animation if one is already in progress (manual trigger)
     if (isAnimatingRef.current && !isTriggeredByTimer) return;
 
     isAnimatingRef.current = true;
@@ -52,39 +60,32 @@ const QuoteDisplay: React.FC = () => {
       changeQuoteContent();
       setIsQuoteVisible(true); // Start fade-in
       isAnimatingRef.current = false;
-    }, quoteFadeDuration); // Use the potentially reduced duration
-
+    }, quoteFadeDuration);
   }, [changeQuoteContent, quoteFadeDuration]);
 
-
-  // Effect for initial load, visibility, and managing the timer
+  // Effect for managing the quote rotation timer
   useEffect(() => {
-    if (currentQuote) {
-      setIsQuoteVisible(true);
-    }
+    // Start timer only after the service and initial quote are ready
+    if (!currentQuote || !quoteService) return;
 
     if (quoteIntervalRef.current) {
       clearInterval(quoteIntervalRef.current);
     }
 
     quoteIntervalRef.current = window.setInterval(() => {
-      animateAndChangeQuote(true); // Trigger animation for timer
+      animateAndChangeQuote(true);
     }, QUOTE_ROTATION_INTERVAL);
 
-
-    // Cleanup on unmount or before effect re-runs
+    // Cleanup on unmount
     return () => {
       if (quoteIntervalRef.current) {
         clearInterval(quoteIntervalRef.current);
-      }
-      if (tooltipTimeoutRef.current) {
-        clearTimeout(tooltipTimeoutRef.current);
       }
       if (toastTimeoutRef.current) {
         clearTimeout(toastTimeoutRef.current);
       }
     };
-  }, [animateAndChangeQuote]);
+  }, [currentQuote, quoteService, animateAndChangeQuote]);
 
   const showToast = (message: string) => {
     setToastMessage(message);
@@ -97,21 +98,13 @@ const QuoteDisplay: React.FC = () => {
   };
 
   const handleInteraction = () => {
-    if (isAnimatingRef.current) return;
-    animateAndChangeQuote(false); // Manually triggered
+    if (isAnimatingRef.current || !quoteService) return;
+    animateAndChangeQuote(false);
   };
 
-  if (!currentQuote) {
-    return (
-      <p className="text-center text-xl text-white p-10" aria-live="polite">
-        No quotes available.
-      </p>
-    );
-  }
-
   const handleToggleFavorite = (event: React.MouseEvent) => {
-    event.stopPropagation(); // Prevent triggering next quote
-    if (!currentQuote) return;
+    event.stopPropagation();
+    if (!currentQuote || !quoteService) return;
 
     const newFavoritedState = !isFavorited;
     setIsFavorited(newFavoritedState);
@@ -126,7 +119,7 @@ const QuoteDisplay: React.FC = () => {
   };
 
   const handleCopyQuote = async (event: React.MouseEvent) => {
-    event.stopPropagation(); // Prevent triggering next quote
+    event.stopPropagation();
     if (!currentQuote) return;
     const textToCopy = `"${currentQuote.text}" - ${currentQuote.author}`;
     try {
@@ -137,6 +130,15 @@ const QuoteDisplay: React.FC = () => {
       showToast('Failed to copy');
     }
   };
+
+  // Loading state
+  if (!currentQuote) {
+    return (
+      <p className="text-center text-xl text-white p-10" aria-live="polite">
+        Loading quotes...
+      </p>
+    );
+  }
 
   return (
     <div
@@ -156,26 +158,20 @@ const QuoteDisplay: React.FC = () => {
         aria-live="polite"
         aria-atomic="true"
       >
-        {currentQuote ? (
-          <>
-            <p
-              className="text-2xl sm:text-3xl lg:text-4xl font-light text-white"
-              style={{ lineHeight: 1.5, textShadow: '0 1px 3px rgba(0,0,0,0.1)' }}
-            >
-              &quot;{currentQuote.text}&quot;
-            </p>
-            <p
-              className="mt-6 text-lg sm:text-xl lg:text-2xl font-medium text-white"
-              style={{ textShadow: '0 1px 3px rgba(0,0,0,0.1)' }}
-            >
-              - {currentQuote.author}
-            </p>
-          </>
-        ) : (
-          <div style={{ minHeight: '100px' }}>
-             <p className="text-transparent">&nbsp;</p>
-          </div>
-        )}
+        <>
+          <p
+            className="text-2xl sm:text-3xl lg:text-4xl font-light text-white"
+            style={{ lineHeight: 1.5, textShadow: '0 1px 3px rgba(0,0,0,0.1)' }}
+          >
+            &quot;{currentQuote.text}&quot;
+          </p>
+          <p
+            className="mt-6 text-lg sm:text-xl lg:text-2xl font-medium text-white"
+            style={{ textShadow: '0 1px 3px rgba(0,0,0,0.1)' }}
+          >
+            - {currentQuote.author}
+          </p>
+        </>
       </div>
 
       {/* Icons Container */}
@@ -193,4 +189,5 @@ const QuoteDisplay: React.FC = () => {
     </div>
   );
 };
+
 export default QuoteDisplay;
