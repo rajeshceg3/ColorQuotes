@@ -76,7 +76,7 @@
       "colors": ["from-ive-indigo-1", "via-ive-yellow-2", "to-ive-purple-1"]
     },
     {
-      "type":f "linear",
+      "type": "linear",
       "angle": "bg-gradient-to-tl",
       "colors": ["from-ive-green-2", "to-ive-pink-1"]
     },
