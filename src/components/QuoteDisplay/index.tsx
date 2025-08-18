@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Quote } from '../../types';
 import { QuoteService } from '../../services/QuoteService';
 import { getReducedMotionDuration } from '../../utils/motion';
+import { usePageVisibility } from '../../utils/usePageVisibility';
 import FavoriteIcon from '../Icons/FavoriteIcon';
 import CopyIcon from '../Icons/CopyIcon';
 import './QuoteDisplay.css';
@@ -12,10 +13,13 @@ const BASE_QUOTE_FADE_DURATION = 1200;
 const QuoteDisplay: React.FC = () => {
   const [quoteService, setQuoteService] = useState<QuoteService | null>(null);
   const [currentQuote, setCurrentQuote] = useState<Quote | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [isQuoteVisible, setIsQuoteVisible] = useState(true);
   const [isFavorited, setIsFavorited] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [allQuotesSeen, setAllQuotesSeen] = useState(false);
   const quoteIntervalRef = useRef<number | null>(null);
+  const isVisible = usePageVisibility();
   const isAnimatingRef = useRef(false);
   const toastTimeoutRef = useRef<number | null>(null);
 
@@ -24,9 +28,14 @@ const QuoteDisplay: React.FC = () => {
   // Initialize the QuoteService
   useEffect(() => {
     const initializeService = async () => {
-      const service = await QuoteService.getInstance();
-      setQuoteService(service);
-      setCurrentQuote(service.getRandomQuote());
+      try {
+        const service = await QuoteService.getInstance();
+        setQuoteService(service);
+        setCurrentQuote(service.getRandomQuote());
+      } catch (err) {
+        console.error('Failed to initialize QuoteService:', err);
+        setError('Could not load quotes. Please try again later.');
+      }
     };
     initializeService();
   }, []);
@@ -38,16 +47,30 @@ const QuoteDisplay: React.FC = () => {
     }
   }, [currentQuote, quoteService]);
 
+  // Effect to show a toast when all quotes have been seen and the cycle restarts
+  useEffect(() => {
+    if (allQuotesSeen) {
+      showToast("You've seen all quotes! Starting over.");
+      setAllQuotesSeen(false); // Reset the trigger
+    }
+  }, [allQuotesSeen]);
+
   const changeQuoteContent = useCallback(() => {
     if (!quoteService) return;
-    setCurrentQuote(prevQuote => {
-      const newQuote = quoteService.getRandomQuote();
-      // If the new quote is null (e.g., all quotes viewed), keep the last one.
-      if (newQuote === null && prevQuote !== null) {
-        return prevQuote;
-      }
-      return newQuote;
-    });
+
+    let newQuote = quoteService.getRandomQuote();
+
+    if (newQuote === null) {
+      // All quotes have been seen, reset and get a new one.
+      setAllQuotesSeen(true); // Trigger feedback
+      quoteService.resetViewedQuotes();
+      newQuote = quoteService.getRandomQuote(); // Should always return a quote now
+    }
+
+    if (newQuote) {
+      setCurrentQuote(newQuote);
+    }
+    // If newQuote is still null (e.g., service failed), we keep the old one.
   }, [quoteService]);
 
   const animateAndChangeQuote = useCallback((isTriggeredByTimer: boolean = false) => {
@@ -65,18 +88,19 @@ const QuoteDisplay: React.FC = () => {
 
   // Effect for managing the quote rotation timer
   useEffect(() => {
-    // Start timer only after the service and initial quote are ready
-    if (!currentQuote || !quoteService) return;
-
+    // Always clear previous interval
     if (quoteIntervalRef.current) {
       clearInterval(quoteIntervalRef.current);
     }
 
-    quoteIntervalRef.current = window.setInterval(() => {
-      animateAndChangeQuote(true);
-    }, QUOTE_ROTATION_INTERVAL);
+    // Start timer only if the page is visible and everything is loaded
+    if (isVisible && currentQuote && quoteService) {
+      quoteIntervalRef.current = window.setInterval(() => {
+        animateAndChangeQuote(true);
+      }, QUOTE_ROTATION_INTERVAL);
+    }
 
-    // Cleanup on unmount
+    // Cleanup on unmount or when dependencies change
     return () => {
       if (quoteIntervalRef.current) {
         clearInterval(quoteIntervalRef.current);
@@ -85,7 +109,7 @@ const QuoteDisplay: React.FC = () => {
         clearTimeout(toastTimeoutRef.current);
       }
     };
-  }, [currentQuote, quoteService, animateAndChangeQuote]);
+  }, [currentQuote, quoteService, animateAndChangeQuote, isVisible]);
 
   const showToast = (message: string) => {
     setToastMessage(message);
@@ -131,6 +155,15 @@ const QuoteDisplay: React.FC = () => {
     }
   };
 
+  // Error state
+  if (error) {
+    return (
+      <p className="text-center text-xl text-red-400 p-10" aria-live="assertive">
+        {error}
+      </p>
+    );
+  }
+
   // Loading state
   if (!currentQuote) {
     return (
@@ -142,8 +175,7 @@ const QuoteDisplay: React.FC = () => {
 
   return (
     <div
-      className="relative text-center w-full max-w-[600px] p-4 cursor-pointer"
-      style={{ minHeight: '250px' }}
+      className="relative text-center w-full max-w-[600px] p-4 cursor-pointer min-h-[250px]"
       onClick={handleInteraction}
       role="button"
       tabIndex={0}
@@ -182,7 +214,12 @@ const QuoteDisplay: React.FC = () => {
 
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="toast-notification">
+        <div
+          className="toast-notification"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
           {toastMessage}
         </div>
       )}

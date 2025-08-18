@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { GradientService, GradientDefinition } from '../../services/GradientService';
 import { getReducedMotionDuration } from '../../utils/motion';
+import { usePageVisibility } from '../../utils/usePageVisibility';
 
 const BASE_GRADIENT_TRANSITION_DURATION = 2000;
 const GRADIENT_CHANGE_INTERVAL = 15000;
@@ -9,17 +10,24 @@ const FALLBACK_GRADIENT_CLASSES = 'bg-gray-800';
 const GradientBackground: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [gradientService, setGradientService] = useState<GradientService | null>(null);
   const [gradients, setGradients] = useState<[GradientDefinition | null, GradientDefinition | null]>([null, null]);
+  const [error, setError] = useState<string | null>(null);
   const [activeGradientIndex, setActiveGradientIndex] = useState(0);
   const gradientIntervalRef = useRef<number | null>(null);
+  const isVisible = usePageVisibility();
   const gradientTransitionDuration = getReducedMotionDuration(BASE_GRADIENT_TRANSITION_DURATION);
 
   useEffect(() => {
     const initializeService = async () => {
-      const service = await GradientService.getInstance();
-      setGradientService(service);
-      const initialBg1 = service.generateGradient();
-      const initialBg2 = service.generateGradient(initialBg1);
-      setGradients([initialBg1, initialBg2]);
+      try {
+        const service = await GradientService.getInstance();
+        setGradientService(service);
+        const initialBg1 = service.generateGradient();
+        const initialBg2 = service.generateGradient(initialBg1);
+        setGradients([initialBg1, initialBg2]);
+      } catch (err) {
+        console.error('Failed to initialize GradientService:', err);
+        setError('Could not load gradients.'); // Set error state
+      }
     };
     initializeService();
   }, []);
@@ -39,17 +47,26 @@ const GradientBackground: React.FC<{ children: React.ReactNode }> = ({ children 
     setActiveGradientIndex(nextGradientIndex);
   }, [gradients, activeGradientIndex, gradientService]);
 
+  const savedCallback = useRef(changeGradient);
+
+  // Keep the saved callback updated
   useEffect(() => {
-    if (!gradientService) return; // Don't start interval until service is ready
-    if (typeof window !== 'undefined') {
-      gradientIntervalRef.current = window.setInterval(changeGradient, GRADIENT_CHANGE_INTERVAL);
+    savedCallback.current = changeGradient;
+  }, [changeGradient]);
+
+  // Manage the interval
+  useEffect(() => {
+    if (gradientService && isVisible) {
+      const tick = () => savedCallback.current();
+      gradientIntervalRef.current = window.setInterval(tick, GRADIENT_CHANGE_INTERVAL);
+
+      return () => {
+        if (gradientIntervalRef.current) {
+          clearInterval(gradientIntervalRef.current);
+        }
+      };
     }
-    return () => {
-      if (gradientIntervalRef.current) {
-        clearInterval(gradientIntervalRef.current);
-      }
-    };
-  }, [changeGradient, gradientService]);
+  }, [gradientService, isVisible]);
 
   const bgClasses = gradients.map(g =>
     g ? GradientService.formatGradientToTailwind(g) : FALLBACK_GRADIENT_CLASSES
