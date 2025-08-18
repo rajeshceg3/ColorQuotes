@@ -19,7 +19,8 @@ export class GradientService {
       this.gradients = data.gradients;
     } catch (error) {
       console.error("Error initializing GradientService:", error);
-      this.gradients = []; // Fallback to empty array on error
+      // Re-throw the error to allow the caller to handle it
+      throw error;
     }
   }
 
