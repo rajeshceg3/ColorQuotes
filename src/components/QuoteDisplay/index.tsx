@@ -174,55 +174,56 @@ const QuoteDisplay: React.FC = () => {
   }
 
   return (
-    <div
-      className="relative text-center w-full max-w-[600px] p-4 cursor-pointer min-h-[250px]"
-      onClick={handleInteraction}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleInteraction(); } }}
-      aria-label="Display next quote"
-    >
+    <div className="relative w-full flex justify-center">
       <div
-        style={{
-          opacity: isQuoteVisible ? 1 : 0,
-          transition: `opacity ${quoteFadeDuration}ms ease-in-out`,
-        }}
-        aria-live="polite"
-        aria-atomic="true"
+        className="glass-card relative w-full max-w-2xl p-8 md:p-12 rounded-3xl transition-all duration-500"
+        role="button"
+        tabIndex={0}
+        onClick={handleInteraction}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleInteraction(); } }}
+        aria-label="Display next quote"
       >
-        <>
-          <p
-            className="text-2xl sm:text-3xl lg:text-4xl font-light text-white"
-            style={{ lineHeight: 1.5, textShadow: '0 1px 3px rgba(0,0,0,0.1)' }}
-          >
-            &quot;{currentQuote.text}&quot;
-          </p>
-          <p
-            className="mt-6 text-lg sm:text-xl lg:text-2xl font-medium text-white"
-            style={{ textShadow: '0 1px 3px rgba(0,0,0,0.1)' }}
-          >
-            - {currentQuote.author}
-          </p>
-        </>
-      </div>
-
-      {/* Icons Container */}
-      <div className="absolute bottom-4 right-4 flex space-x-2 icon-container">
-        <FavoriteIcon isFavorited={isFavorited} onClick={handleToggleFavorite} />
-        <CopyIcon onClick={handleCopyQuote} />
-      </div>
-
-      {/* Toast Notification */}
-      {toastMessage && (
         <div
-          className="toast-notification"
-          role="status"
+          className="flex flex-col items-center justify-center min-h-[300px]"
+          style={{
+            opacity: isQuoteVisible ? 1 : 0,
+            transform: isQuoteVisible ? 'translateY(0)' : 'translateY(10px)',
+            transition: `opacity ${quoteFadeDuration}ms ease-out, transform ${quoteFadeDuration}ms ease-out`,
+          }}
           aria-live="polite"
           aria-atomic="true"
         >
-          {toastMessage}
+          <p
+            className="text-3xl md:text-5xl font-semibold text-white tracking-tight leading-tight text-center drop-shadow-sm select-none"
+          >
+            &quot;{currentQuote.text}&quot;
+          </p>
+          <div className="w-12 h-1 bg-white/30 rounded-full my-8"></div>
+          <p
+            className="text-xl md:text-2xl font-medium text-white/90 tracking-wide uppercase text-center drop-shadow-sm"
+          >
+            {currentQuote.author}
+          </p>
         </div>
-      )}
+
+        {/* Floating Action Bar */}
+        <div className="absolute bottom-6 right-6 flex items-center space-x-3 bg-black/20 backdrop-blur-md rounded-full px-4 py-2 border border-white/10 shadow-lg">
+          <FavoriteIcon isFavorited={isFavorited} onClick={handleToggleFavorite} />
+          <div className="w-px h-4 bg-white/20"></div>
+          <CopyIcon onClick={handleCopyQuote} />
+        </div>
+      </div>
+
+      {/* Toast Notification */}
+      <div
+        className={`fixed top-8 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ${
+          toastMessage ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'
+        }`}
+      >
+        <div className="bg-white/90 backdrop-blur-md text-slate-900 px-6 py-3 rounded-full shadow-xl font-medium text-sm flex items-center space-x-2">
+          <span>{toastMessage}</span>
+        </div>
+      </div>
     </div>
   );
 };

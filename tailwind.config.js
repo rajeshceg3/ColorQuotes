@@ -6,6 +6,9 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+      },
       colors: {
         'ive-blue-1': '#007aff',
         'ive-blue-2': '#5ac8fa',
