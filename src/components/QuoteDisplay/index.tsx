@@ -5,10 +5,11 @@ import { getReducedMotionDuration } from '../../utils/motion';
 import { usePageVisibility } from '../../utils/usePageVisibility';
 import FavoriteIcon from '../Icons/FavoriteIcon';
 import CopyIcon from '../Icons/CopyIcon';
+import ShareIcon from '../Icons/ShareIcon';
 import './QuoteDisplay.css';
 
 const QUOTE_ROTATION_INTERVAL = 30000; // 30 seconds
-const BASE_QUOTE_FADE_DURATION = 1200;
+const BASE_QUOTE_FADE_DURATION = 1000;
 
 const QuoteDisplay: React.FC = () => {
   const [quoteService, setQuoteService] = useState<QuoteService | null>(null);
@@ -70,7 +71,6 @@ const QuoteDisplay: React.FC = () => {
     if (newQuote) {
       setCurrentQuote(newQuote);
     }
-    // If newQuote is still null (e.g., service failed), we keep the old one.
   }, [quoteService]);
 
   const animateAndChangeQuote = useCallback((isTriggeredByTimer: boolean = false) => {
@@ -83,24 +83,21 @@ const QuoteDisplay: React.FC = () => {
       changeQuoteContent();
       setIsQuoteVisible(true); // Start fade-in
       isAnimatingRef.current = false;
-    }, quoteFadeDuration);
+    }, quoteFadeDuration / 2); // Faster switch
   }, [changeQuoteContent, quoteFadeDuration]);
 
   // Effect for managing the quote rotation timer
   useEffect(() => {
-    // Always clear previous interval
     if (quoteIntervalRef.current) {
       clearInterval(quoteIntervalRef.current);
     }
 
-    // Start timer only if the page is visible and everything is loaded
     if (isVisible && currentQuote && quoteService) {
       quoteIntervalRef.current = window.setInterval(() => {
         animateAndChangeQuote(true);
       }, QUOTE_ROTATION_INTERVAL);
     }
 
-    // Cleanup on unmount or when dependencies change
     return () => {
       if (quoteIntervalRef.current) {
         clearInterval(quoteIntervalRef.current);
@@ -135,10 +132,30 @@ const QuoteDisplay: React.FC = () => {
 
     if (newFavoritedState) {
       quoteService.addFavorite(currentQuote.id);
-      showToast('Favorited!');
+      showToast('Favorited');
     } else {
       quoteService.removeFavorite(currentQuote.id);
       showToast('Unfavorited');
+    }
+  };
+
+  const handleShare = async (event: React.MouseEvent) => {
+    event.stopPropagation();
+    if (!currentQuote) return;
+
+    const text = `"${currentQuote.text}" - ${currentQuote.author}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Inspirational Quote',
+          text: text,
+        });
+      } catch (err) {
+        console.error('Share failed:', err);
+      }
+    } else {
+      handleCopyQuote(event);
     }
   };
 
@@ -148,7 +165,7 @@ const QuoteDisplay: React.FC = () => {
     const textToCopy = `"${currentQuote.text}" - ${currentQuote.author}`;
     try {
       await navigator.clipboard.writeText(textToCopy);
-      showToast('Copied!');
+      showToast('Copied to clipboard');
     } catch (err) {
       console.error('Failed to copy quote: ', err);
       showToast('Failed to copy');
@@ -158,70 +175,112 @@ const QuoteDisplay: React.FC = () => {
   // Error state
   if (error) {
     return (
-      <p className="text-center text-xl text-red-400 p-10" aria-live="assertive">
-        {error}
-      </p>
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <p className="text-center text-lg md:text-xl text-white/80 p-10 font-medium tracking-wide" aria-live="assertive">
+          {error}
+        </p>
+      </div>
     );
   }
 
   // Loading state
   if (!currentQuote) {
     return (
-      <p className="text-center text-xl text-white p-10" aria-live="polite">
-        Loading quotes...
-      </p>
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="animate-pulse flex flex-col items-center">
+            <div className="h-4 bg-white/20 rounded w-48 mb-4"></div>
+            <div className="h-4 bg-white/10 rounded w-32"></div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <div className="relative w-full flex justify-center">
+    <div className="relative w-full flex justify-center items-center px-4 md:px-0">
       <div
-        className="glass-card relative w-full max-w-2xl p-8 md:p-12 rounded-3xl transition-all duration-500"
+        className="glass-card relative w-full md:max-w-4xl min-h-[60vh] md:min-h-[500px] flex flex-col justify-between p-8 md:p-16 rounded-[2.5rem] md:rounded-[3rem] transition-all duration-700 ease-out"
         role="button"
         tabIndex={0}
         onClick={handleInteraction}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleInteraction(); } }}
         aria-label="Display next quote"
       >
+        {/* Quote Content */}
         <div
-          className="flex flex-col items-center justify-center min-h-[300px]"
+          className="flex-1 flex flex-col items-center justify-center text-center"
           style={{
             opacity: isQuoteVisible ? 1 : 0,
-            transform: isQuoteVisible ? 'translateY(0)' : 'translateY(10px)',
-            transition: `opacity ${quoteFadeDuration}ms ease-out, transform ${quoteFadeDuration}ms ease-out`,
+            transform: isQuoteVisible ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.98)',
+            transition: `opacity ${quoteFadeDuration}ms ease-out, transform ${quoteFadeDuration}ms cubic-bezier(0.2, 0.8, 0.2, 1)`,
+            filter: isQuoteVisible ? 'blur(0px)' : 'blur(4px)',
           }}
           aria-live="polite"
           aria-atomic="true"
         >
+          <div className="mb-8 md:mb-12">
+             <span className="text-6xl text-white/10 font-serif leading-none select-none">“</span>
+          </div>
+
           <p
-            className="text-3xl md:text-5xl font-semibold text-white tracking-tight leading-tight text-center drop-shadow-sm select-none"
+            className="text-quote-sm md:text-quote-md lg:text-quote-lg font-semibold text-white tracking-tight leading-snug drop-shadow-sm select-none max-w-prose mx-auto"
           >
-            &quot;{currentQuote.text}&quot;
+            {currentQuote.text}
           </p>
-          <div className="w-12 h-1 bg-white/30 rounded-full my-8"></div>
+
+          <div className="w-16 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent my-10 md:my-12"></div>
+
           <p
-            className="text-xl md:text-2xl font-medium text-white/90 tracking-wide uppercase text-center drop-shadow-sm"
+            className="text-attrib-sm md:text-attrib-md lg:text-attrib-lg font-medium text-white/80 tracking-widest uppercase shadow-black/5 drop-shadow-sm"
           >
             {currentQuote.author}
           </p>
         </div>
 
-        {/* Floating Action Bar */}
-        <div className="absolute bottom-6 right-6 flex items-center space-x-3 bg-black/20 backdrop-blur-md rounded-full px-4 py-2 border border-white/10 shadow-lg">
-          <FavoriteIcon isFavorited={isFavorited} onClick={handleToggleFavorite} />
-          <div className="w-px h-4 bg-white/20"></div>
-          <CopyIcon onClick={handleCopyQuote} />
+        {/* Controls - Mobile: Bottom Bar, Desktop: Floating Bottom Right */}
+        <div
+            className="
+                mt-8 md:mt-0
+                flex items-center justify-center md:justify-end
+                w-full md:w-auto
+                md:absolute md:bottom-10 md:right-10
+                pointer-events-none /* Parent is purely layout */
+            "
+        >
+            <div
+                className="
+                    pointer-events-auto
+                    flex items-center space-x-2 md:space-x-4
+                    bg-black/20 backdrop-blur-xl
+                    rounded-full px-6 py-3 md:px-5 md:py-2.5
+                    border border-white/10 shadow-lg
+                    transition-transform duration-300 hover:scale-[1.02]
+                "
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className="icon-button p-2 rounded-full cursor-pointer text-white/90 hover:text-white" onClick={handleToggleFavorite} title={isFavorited ? "Unfavorite" : "Favorite"}>
+                    <FavoriteIcon isFavorited={isFavorited}  />
+                </div>
+                <div className="w-px h-5 bg-white/10"></div>
+                <div className="icon-button p-2 rounded-full cursor-pointer text-white/90 hover:text-white" onClick={handleCopyQuote} title="Copy to clipboard">
+                     <CopyIcon />
+                </div>
+                <div className="w-px h-5 bg-white/10"></div>
+                <div className="icon-button p-2 rounded-full cursor-pointer text-white/90 hover:text-white" onClick={handleShare} title="Share quote">
+                     <ShareIcon />
+                </div>
+            </div>
         </div>
       </div>
 
-      {/* Toast Notification */}
+      {/* Refined Toast Notification */}
       <div
-        className={`fixed top-8 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ${
-          toastMessage ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'
+        className={`fixed top-10 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-500 cubic-bezier(0.2, 0.8, 0.2, 1) ${
+          toastMessage ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-4 scale-95 pointer-events-none'
         }`}
       >
-        <div className="bg-white/90 backdrop-blur-md text-slate-900 px-6 py-3 rounded-full shadow-xl font-medium text-sm flex items-center space-x-2">
-          <span>{toastMessage}</span>
+        <div className="glass-card bg-white/90 backdrop-blur-2xl text-slate-900 px-8 py-4 rounded-full shadow-2xl font-medium text-sm flex items-center space-x-3 border border-white/40">
+           <div className="w-2 h-2 rounded-full bg-ive-blue-1"></div>
+           <span className="tracking-wide text-slate-800">{toastMessage}</span>
         </div>
       </div>
     </div>

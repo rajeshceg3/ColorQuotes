@@ -1,30 +1,29 @@
 import React from 'react';
 
 interface CopyIconProps {
-  onClick: (event: React.MouseEvent) => void;
+  onClick?: (event: React.MouseEvent) => void;
 }
 
-const CopyIcon: React.FC<CopyIconProps> = ({ onClick }) => (
-  <button
-    onClick={onClick}
-    aria-label="Copy quote and author"
-    className="p-2 text-white hover:text-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400 rounded-full"
-  >
+const CopyIcon: React.FC<CopyIconProps> = ({ onClick }) => {
+  return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className="h-6 w-6"
       fill="none"
       viewBox="0 0 24 24"
+      strokeWidth={1.5}
       stroke="currentColor"
+      className="w-6 h-6"
+      onClick={onClick}
+      aria-label="Copy quote to clipboard"
+      role="img"
     >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
-        strokeWidth={2}
-        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+        d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5"
       />
     </svg>
-  </button>
-);
+  );
+};
 
 export default CopyIcon;

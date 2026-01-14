@@ -2,31 +2,29 @@ import React from 'react';
 
 interface FavoriteIconProps {
   isFavorited: boolean;
-  onClick: (event: React.MouseEvent) => void;
+  onClick?: (event: React.MouseEvent) => void;
 }
 
-const FavoriteIcon: React.FC<FavoriteIconProps> = ({ isFavorited, onClick }) => (
-  <button
-    onClick={onClick}
-    aria-label={isFavorited ? "Unfavorite this quote" : "Favorite this quote"}
-    className="p-2 text-white hover:text-yellow-400 focus:outline-none focus:ring-1 focus:ring-yellow-400 rounded-full"
-    aria-pressed={isFavorited}
-  >
+const FavoriteIcon: React.FC<FavoriteIconProps> = ({ isFavorited, onClick }) => {
+  return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className="h-6 w-6"
       fill={isFavorited ? 'currentColor' : 'none'}
       viewBox="0 0 24 24"
+      strokeWidth={1.5}
       stroke="currentColor"
+      className={`w-6 h-6 transition-colors duration-300 ${isFavorited ? 'text-red-500' : 'text-current'}`}
+      onClick={onClick}
+      aria-label={isFavorited ? 'Unfavorite this quote' : 'Favorite this quote'}
+      role="img"
     >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
-        strokeWidth={2}
-        d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.175 0l-3.976 2.888c-.783.57-1.838-.196-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118L2.05 10.1c-.783-.57-.38-1.81.588-1.81h4.914a1 1 0 00.95-.69L11.049 2.927z"
+        d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
       />
     </svg>
-  </button>
-);
+  );
+};
 
 export default FavoriteIcon;

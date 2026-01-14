@@ -1,20 +1,91 @@
 .glass-card {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  /* Base Glass Effect */
+  background: rgba(255, 255, 255, 0.08); /* Slightly more transparent */
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+
+  /* Delicate Borders */
   border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  border-top: 1px solid rgba(255, 255, 255, 0.3); /* Top highlight */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+  /* Multi-layered shadows for depth */
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06),
+    0 20px 40px -5px rgba(0, 0, 0, 0.1), /* Deep shadow */
+    inset 0 0 20px rgba(255, 255, 255, 0.05); /* Inner glow */
+
+  animation: enter-spring 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* Subtle Gradient Overlay for added richness */
+.glass-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(255, 255, 255, 0.05) 40%,
+    rgba(255, 255, 255, 0.01) 100%
+  );
+  pointer-events: none;
+  z-index: -1;
+  animation: ambient-shimmer 8s ease-in-out infinite;
+}
+
+@keyframes enter-spring {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes ambient-shimmer {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
 }
 
 .icon-button {
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 9999px;
+  position: relative;
+  overflow: hidden;
+}
+
+.icon-button::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.1);
+  opacity: 0;
+  transition: opacity 0.2s;
 }
 
 .icon-button:hover {
-  transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px) scale(1.05);
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.icon-button:hover::after {
+  opacity: 1;
 }
 
 .icon-button:active {
-  transform: translateY(0px);
+  transform: translateY(0px) scale(0.95);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.icon-button:focus-visible {
+  outline: none;
+  ring: 2px;
+  ring-offset: 2px;
+  ring-color: rgba(255, 255, 255, 0.5);
 }
