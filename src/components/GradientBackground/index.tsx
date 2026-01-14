@@ -10,7 +10,6 @@ const FALLBACK_GRADIENT_CLASSES = 'bg-gray-800';
 const GradientBackground: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [gradientService, setGradientService] = useState<GradientService | null>(null);
   const [gradients, setGradients] = useState<[GradientDefinition | null, GradientDefinition | null]>([null, null]);
-  const [error, setError] = useState<string | null>(null);
   const [activeGradientIndex, setActiveGradientIndex] = useState(0);
   const gradientIntervalRef = useRef<number | null>(null);
   const isVisible = usePageVisibility();
@@ -26,7 +25,6 @@ const GradientBackground: React.FC<{ children: React.ReactNode }> = ({ children 
         setGradients([initialBg1, initialBg2]);
       } catch (err) {
         console.error('Failed to initialize GradientService:', err);
-        setError('Could not load gradients.'); // Set error state
       }
     };
     initializeService();

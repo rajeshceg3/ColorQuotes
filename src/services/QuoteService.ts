@@ -1,151 +1,108 @@
-// src/services/QuoteService.ts
-import { Quote, QuoteCategory } from '../types';
-import { LocalStorageService } from './LocalStorageService';
+import { Quote } from '../types';
 
-const VIEWED_QUOTES_KEY = 'viewedQuotes';
-const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
-
-interface ViewedQuotes {
-  [id: string]: string; // Store quote ID and ISO timestamp of when it was viewed
-}
-
-const FAVORITED_QUOTES_KEY = 'favoriteQuoteIds';
+const STORAGE_KEYS = {
+  FAVORITES: 'quote-app-favorites',
+  VIEWED: 'quote-app-viewed'
+};
 
 export class QuoteService {
   private static instance: QuoteService;
   private quotes: Quote[] = [];
+  private viewedQuotes: Set<string> = new Set();
+  private favoritedQuotes: Set<string> = new Set();
+  private isInitialized = false;
 
   private constructor() {
-    // Constructor is now empty, initialization is handled asynchronously.
-  }
-
-  private async initialize(): Promise<void> {
-    try {
-      const response = await fetch('/api/quotes');
-      if (!response.ok) {
-        throw new Error(`Failed to fetch quotes: ${response.statusText}`);
-      }
-      const allQuotesData = await response.json();
-
-      // Ensure character_count is a number, and dates are strings
-      this.quotes = allQuotesData.quotes.map((q: any) => ({
-        ...q,
-        character_count: Number(q.character_count),
-        category: q.category as QuoteCategory,
-        created_at: String(q.created_at),
-        updated_at: String(q.updated_at),
-      }));
-    } catch (error) {
-      console.error('Error initializing QuoteService:', error);
-      // Re-throw the error to allow the caller to handle it
-      throw error;
-    }
+    this.loadFromStorage();
   }
 
   public static async getInstance(): Promise<QuoteService> {
     if (!QuoteService.instance) {
-      const instance = new QuoteService();
-      await instance.initialize();
-      QuoteService.instance = instance;
+      QuoteService.instance = new QuoteService();
+    }
+    if (!QuoteService.instance.isInitialized) {
+        await QuoteService.instance.init();
     }
     return QuoteService.instance;
   }
 
-  public getRandomQuote(currentCategory?: QuoteCategory): Quote | null {
-    if (this.quotes.length === 0) {
-      return null;
-    }
+  private async init(): Promise<void> {
+      if (this.isInitialized) return;
 
-    const viewedQuotes = LocalStorageService.getItem<ViewedQuotes>(VIEWED_QUOTES_KEY) || {};
-    const now = new Date().getTime();
-
-    const sourceQuotes = currentCategory
-      ? this.quotes.filter(q => q.category === currentCategory)
-      : this.quotes;
-
-    const availableQuotes = sourceQuotes.filter(quote => {
-      const viewedTimestamp = viewedQuotes[quote.id];
-      if (!viewedTimestamp) return true;
-      return now - new Date(viewedTimestamp).getTime() >= TWENTY_FOUR_HOURS_MS;
-    });
-
-    if (availableQuotes.length === 0 && sourceQuotes.length > 0) {
-      return null; // Signal that we're out of quotes for this cycle
-    }
-
-    if (availableQuotes.length === 0) {
-      return null;
-    }
-
-    const randomIndex = Math.floor(Math.random() * availableQuotes.length);
-    const selectedQuote = availableQuotes[randomIndex];
-
-    // Record viewed quote
-    viewedQuotes[selectedQuote.id] = new Date().toISOString();
-    LocalStorageService.setItem(VIEWED_QUOTES_KEY, viewedQuotes);
-
-    return selectedQuote;
-  }
-
-  public resetViewedQuotes(category?: QuoteCategory): void {
-    if (!category) {
-      LocalStorageService.removeItem(VIEWED_QUOTES_KEY);
-    } else {
-      const viewedQuotes = LocalStorageService.getItem<ViewedQuotes>(VIEWED_QUOTES_KEY) || {};
-      const categoryQuoteIds = new Set(
-        this.quotes.filter(q => q.category === category).map(q => q.id)
-      );
-
-      for (const quoteId in viewedQuotes) {
-        if (categoryQuoteIds.has(quoteId)) {
-          delete viewedQuotes[quoteId];
-        }
+      try {
+          const response = await fetch('/api/quotes');
+          if (!response.ok) throw new Error('Failed to fetch quotes');
+          const data = await response.json();
+          // The JSON structure is { quotes: [...] }
+          this.quotes = data.quotes || [];
+      } catch (error) {
+          console.error("QuoteService init failed, using fallback", error);
+          this.quotes = [
+            { id: '1', text: "The only way to do great work is to love what you do.", author: "Steve Jobs", category: 'motivation' },
+            { id: '2', text: "Life is what happens when you're busy making other plans.", author: "John Lennon", category: 'life' },
+            { id: '3', text: "The future belongs to those who believe in the beauty of their dreams.", author: "Eleanor Roosevelt", category: 'wisdom' },
+          ];
       }
-      LocalStorageService.setItem(VIEWED_QUOTES_KEY, viewedQuotes);
+      this.isInitialized = true;
+  }
+
+  private loadFromStorage() {
+      try {
+          const viewed = localStorage.getItem(STORAGE_KEYS.VIEWED);
+          if (viewed) this.viewedQuotes = new Set(JSON.parse(viewed));
+
+          const favs = localStorage.getItem(STORAGE_KEYS.FAVORITES);
+          if (favs) this.favoritedQuotes = new Set(JSON.parse(favs));
+      } catch (e) {
+          console.warn('Failed to load storage', e);
+      }
+  }
+
+  private saveToStorage() {
+      try {
+          localStorage.setItem(STORAGE_KEYS.VIEWED, JSON.stringify(Array.from(this.viewedQuotes)));
+          localStorage.setItem(STORAGE_KEYS.FAVORITES, JSON.stringify(Array.from(this.favoritedQuotes)));
+      } catch (e) {
+          console.warn('Failed to save storage', e);
+      }
+  }
+
+  public getRandomQuote(): Quote | null {
+    const unviewedQuotes = this.quotes.filter(q => !this.viewedQuotes.has(q.id));
+
+    if (unviewedQuotes.length === 0) {
+        return null;
     }
+
+    const randomIndex = Math.floor(Math.random() * unviewedQuotes.length);
+    const quote = unviewedQuotes[randomIndex];
+
+    this.viewedQuotes.add(quote.id);
+    this.saveToStorage();
+
+    return quote;
   }
 
-  public getQuoteById(id: string): Quote | null {
-    return this.quotes.find(quote => quote.id === id) || null;
+  public resetViewedQuotes(): void {
+    this.viewedQuotes.clear();
+    this.saveToStorage();
   }
 
-  public getQuotes(count: number, category?: QuoteCategory): Quote[] {
-    const filteredQuotes = category
-      ? this.quotes.filter(quote => quote.category === category)
-      : this.quotes;
-
-    return filteredQuotes.slice(0, count);
+  public isQuoteFavorited(id: string): boolean {
+      return this.favoritedQuotes.has(id);
   }
 
-  public getAllCategories(): QuoteCategory[] {
-    const categories = new Set<QuoteCategory>();
-    this.quotes.forEach(quote => categories.add(quote.category));
-    return Array.from(categories);
+  public addFavorite(id: string): void {
+      this.favoritedQuotes.add(id);
+      this.saveToStorage();
   }
 
-  // Favorite Management Methods
-  public getFavoriteQuoteIds(): string[] {
-    return LocalStorageService.getItem<string[]>(FAVORITED_QUOTES_KEY) || [];
+  public removeFavorite(id: string): void {
+      this.favoritedQuotes.delete(id);
+      this.saveToStorage();
   }
 
-  public isQuoteFavorited(quoteId: string): boolean {
-    const favorites = this.getFavoriteQuoteIds();
-    return favorites.includes(quoteId);
-  }
-
-  public addFavorite(quoteId: string): void {
-    const favorites = this.getFavoriteQuoteIds();
-    if (!favorites.includes(quoteId)) {
-      favorites.push(quoteId);
-      LocalStorageService.setItem(FAVORITED_QUOTES_KEY, favorites);
-    }
-  }
-
-  public removeFavorite(quoteId: string): void {
-    let favorites = this.getFavoriteQuoteIds();
-    if (favorites.includes(quoteId)) {
-      favorites = favorites.filter(id => id !== quoteId);
-      LocalStorageService.setItem(FAVORITED_QUOTES_KEY, favorites);
-    }
+  public getQuoteById(id: string): Quote | undefined {
+    return this.quotes.find(q => q.id === id);
   }
 }

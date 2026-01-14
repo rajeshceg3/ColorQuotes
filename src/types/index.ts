@@ -1,24 +1,14 @@
-export enum QuoteCategory {
-  MOTIVATIONAL = 'motivational',
-  SUCCESS = 'success',
-  HAPPINESS = 'happiness',
-  WISDOM = 'wisdom',
-  CREATIVITY = 'creativity',
-  LEADERSHIP = 'leadership',
-  PERSEVERANCE = 'perseverance',
-  GENERAL = 'general',
-}
+// src/types/index.ts
+export type QuoteCategory = 'wisdom' | 'motivation' | 'life' | 'philosophy' | 'art' | 'science';
 
 export interface Quote {
   id: string;
   text: string;
   author: string;
   category: QuoteCategory;
-  source?: string;
-  verified: boolean;
-  created_at: string;
-  updated_at: string;
-  language: string;
-  character_count: number;
-  tags: string[];
+}
+
+export interface GradientDefinition {
+  colors: string[];
+  direction: string;
 }

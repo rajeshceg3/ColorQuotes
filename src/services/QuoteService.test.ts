@@ -1,87 +1,89 @@
-// src/services/QuoteService.test.ts
-
-// We need to test the real service, not the mock.
-jest.unmock('./QuoteService');
-
 import { QuoteService } from './QuoteService';
-import { LocalStorageService } from './LocalStorageService';
-import { Quote, QuoteCategory } from '../types';
 
-const mockQuotesData = {
-  quotes: [
-    { id: '1', text: 'Quote 1', author: 'Author 1', category: 'motivational' },
-    { id: '2', text: 'Quote 2', author: 'Author 2', category: 'wisdom' },
-    { id: '3', text: 'Quote 3', author: 'Author 3', category: 'motivational' },
-  ],
-};
-
-// Mock the global fetch function
+// Mock global fetch
 global.fetch = jest.fn(() =>
   Promise.resolve({
     ok: true,
-    json: () => Promise.resolve(mockQuotesData),
+    json: () => Promise.resolve({
+      quotes: [
+          { id: '1', text: 'Test Quote 1', author: 'Author 1' },
+          { id: '2', text: 'Test Quote 2', author: 'Author 2' }
+      ]
+    }),
   })
 ) as jest.Mock;
 
-// Mock LocalStorageService
-jest.mock('./LocalStorageService');
+// Mock localStorage
+const localStorageMock = (() => {
+  let store: Record<string, string> = {};
+  return {
+    getItem: (key: string) => store[key] || null,
+    setItem: (key: string, value: string) => {
+      store[key] = value.toString();
+    },
+    clear: () => {
+      store = {};
+    },
+    removeItem: (key: string) => {
+      delete store[key];
+    }
+  };
+})();
+Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
-describe('QuoteService (Real Implementation)', () => {
-  let quoteService: QuoteService;
-  let mockGetItem: jest.SpyInstance;
-  let mockSetItem: jest.SpyInstance;
-
-  beforeEach(async () => {
-    // Reset singleton instance before each test to ensure clean state
+describe('QuoteService', () => {
+  beforeEach(() => {
+    // Reset the singleton instance to ensure fresh state for each test
+    // This is a hack for testing singletons
     (QuoteService as any).instance = null;
-
-    mockGetItem = jest.spyOn(LocalStorageService, 'getItem');
-    mockSetItem = jest.spyOn(LocalStorageService, 'setItem');
+    localStorage.clear();
     (global.fetch as jest.Mock).mockClear();
-
-    quoteService = await QuoteService.getInstance();
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('should fetch and process quotes during initialization', async () => {
+  it('should initialize and fetch quotes from API', async () => {
+    const service = await QuoteService.getInstance();
+    expect(service).toBeDefined();
     expect(global.fetch).toHaveBeenCalledWith('/api/quotes');
-    // Test that the service has processed the quotes
-    const quote = quoteService.getQuoteById('1');
+
+    // Verify fallback or fetched data works
+    const quote = service.getRandomQuote();
     expect(quote).toBeDefined();
-    expect(quote?.category).toBe('motivational');
+    // Since we mocked fetch, it should come from there
+    expect(quote?.text).toContain('Test Quote');
   });
 
-  describe('getRandomQuote', () => {
-    it('should not return a recently viewed quote', () => {
-      const randomSpy = jest.spyOn(Math, 'random').mockReturnValue(0.5); // Pick the middle element
+  it('should fallback if API fails', async () => {
+     (global.fetch as jest.Mock).mockImplementationOnce(() =>
+        Promise.reject('API Error')
+     );
 
-      const now = new Date();
-      const recentlyViewed = { '1': new Date(now.getTime() - 1000).toISOString() };
-      mockGetItem.mockReturnValue(recentlyViewed);
-
-      // Available quotes are '2' and '3'. 0.5 * 2 = 1. So it should pick '3'.
-      const quote = quoteService.getRandomQuote();
-      expect(quote?.id).not.toBe('1');
-      expect(quote?.id).toBe('3');
-
-      randomSpy.mockRestore();
-    });
+     const service = await QuoteService.getInstance();
+     const quote = service.getRandomQuote();
+     // Should fallback to hardcoded list
+     expect(quote).toBeDefined();
+     expect(quote?.text).toBeDefined();
   });
 
-  describe('Favorite Management', () => {
-    it('addFavorite should add a quote ID to favorites', () => {
-      mockGetItem.mockReturnValue(['1']);
-      quoteService.addFavorite('2');
-      expect(mockSetItem).toHaveBeenCalledWith('favoriteQuoteIds', ['1', '2']);
-    });
+  it('should persist favorites', async () => {
+      const service = await QuoteService.getInstance();
+      const quote = service.getRandomQuote();
+      if (!quote) throw new Error("No quote");
 
-    it('removeFavorite should remove a quote ID from favorites', () => {
-      mockGetItem.mockReturnValue(['1', '2', '3']);
-      quoteService.removeFavorite('2');
-      expect(mockSetItem).toHaveBeenCalledWith('favoriteQuoteIds', ['1', '3']);
-    });
+      service.addFavorite(quote.id);
+      expect(service.isQuoteFavorited(quote.id)).toBe(true);
+
+      // Verify localStorage
+      const storedFavs = localStorage.getItem('quote-app-favorites');
+      expect(storedFavs).toContain(quote.id);
+  });
+
+  it('should persist viewed history', async () => {
+      const service = await QuoteService.getInstance();
+      const quote = service.getRandomQuote();
+      if (!quote) throw new Error("No quote");
+
+      // getRandomQuote automatically marks as viewed
+      const storedViewed = localStorage.getItem('quote-app-viewed');
+      expect(storedViewed).toContain(quote.id);
   });
 });
