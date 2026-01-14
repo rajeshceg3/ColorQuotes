@@ -5,10 +5,7 @@ import GradientBackground from './components/GradientBackground';
 function App() {
   return (
     <GradientBackground>
-      {/* "Content Area" centered with max-width 800px */}
-      <main
-        className="flex flex-col items-center justify-center min-h-screen w-full max-w-[800px] mx-auto p-5 sm:p-10" // mobile p-5 (20px), desktop p-10 (40px)
-      >
+      <main className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center h-full">
         <QuoteDisplay />
       </main>
     </GradientBackground>

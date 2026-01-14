@@ -9,6 +9,13 @@ export default {
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
       },
+      letterSpacing: {
+        tighter: '-0.04em',
+        tight: '-0.02em',
+        normal: '-0.01em',
+        wide: '0.02em',
+        wider: '0.05em',
+      },
       colors: {
         'ive-blue-1': '#007aff',
         'ive-blue-2': '#5ac8fa',
@@ -31,12 +38,15 @@ export default {
         'muted-dark-canvas': '#2C3E50', // Added new color
       },
       fontSize: {
-        'quote-lg': ['2.5rem', { lineHeight: '1.4' }],
-        'quote-md': ['2.2rem', { lineHeight: '1.4' }],
-        'quote-sm': ['1.8rem', { lineHeight: '1.4' }],
-        'attrib-lg': ['1.2rem', { lineHeight: '1.4' }],
-        'attrib-md': ['1.1rem', { lineHeight: '1.4' }],
-        'attrib-sm': ['1.0rem', { lineHeight: '1.4' }],
+        'quote-lg': ['2.5rem', { lineHeight: '1.2', letterSpacing: '-0.03em' }],
+        'quote-md': ['2.0rem', { lineHeight: '1.25', letterSpacing: '-0.025em' }],
+        'quote-sm': ['1.6rem', { lineHeight: '1.3', letterSpacing: '-0.02em' }],
+        'attrib-lg': ['1.1rem', { lineHeight: '1.5', letterSpacing: '0.02em' }],
+        'attrib-md': ['1.0rem', { lineHeight: '1.5', letterSpacing: '0.02em' }],
+        'attrib-sm': ['0.875rem', { lineHeight: '1.5', letterSpacing: '0.02em' }],
+      },
+      screens: {
+        'xs': '480px',
       },
     },
   },

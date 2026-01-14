@@ -5,7 +5,6 @@ jest.unmock('./QuoteService');
 
 import { QuoteService } from './QuoteService';
 import { LocalStorageService } from './LocalStorageService';
-import { Quote, QuoteCategory } from '../types';
 
 const mockQuotesData = {
   quotes: [

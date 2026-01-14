@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { GradientService, GradientDefinition } from '../../services/GradientService';
+import { GradientService } from '../../services/GradientService';
+import { GradientDefinition } from '../../types';
 import { getReducedMotionDuration } from '../../utils/motion';
 import { usePageVisibility } from '../../utils/usePageVisibility';
 
@@ -10,7 +11,6 @@ const FALLBACK_GRADIENT_CLASSES = 'bg-gray-800';
 const GradientBackground: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [gradientService, setGradientService] = useState<GradientService | null>(null);
   const [gradients, setGradients] = useState<[GradientDefinition | null, GradientDefinition | null]>([null, null]);
-  const [error, setError] = useState<string | null>(null);
   const [activeGradientIndex, setActiveGradientIndex] = useState(0);
   const gradientIntervalRef = useRef<number | null>(null);
   const isVisible = usePageVisibility();
@@ -26,7 +26,6 @@ const GradientBackground: React.FC<{ children: React.ReactNode }> = ({ children 
         setGradients([initialBg1, initialBg2]);
       } catch (err) {
         console.error('Failed to initialize GradientService:', err);
-        setError('Could not load gradients.'); // Set error state
       }
     };
     initializeService();
@@ -73,7 +72,7 @@ const GradientBackground: React.FC<{ children: React.ReactNode }> = ({ children 
   );
 
   return (
-    <div className="relative min-h-screen w-full">
+    <div className="relative min-h-[100dvh] w-full overflow-hidden">
       <div
         data-testid="gradient-bg-1"
         className={`absolute inset-0 ${bgClasses[0]}`}
@@ -101,7 +100,7 @@ const GradientBackground: React.FC<{ children: React.ReactNode }> = ({ children 
         aria-hidden="true"
       />
 
-      <div className="relative min-h-screen w-full flex flex-col items-center justify-center isolate">
+      <div className="relative min-h-[100dvh] w-full flex flex-col items-center justify-center isolate">
         {children}
       </div>
     </div>

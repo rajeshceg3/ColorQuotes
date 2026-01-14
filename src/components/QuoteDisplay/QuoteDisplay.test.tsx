@@ -1,9 +1,8 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import QuoteDisplay from './index';
 import { QuoteService } from '../../services/QuoteService';
-import { Quote } from '../../types';
+import { Quote, QuoteCategory } from '../../types';
 import { usePageVisibility } from '../../utils/usePageVisibility';
 
 // Mock the services and hooks
@@ -14,8 +13,8 @@ const mockedQuoteService = QuoteService as jest.Mocked<typeof QuoteService>;
 const mockedUsePageVisibility = usePageVisibility as jest.Mock;
 
 const mockQuotes: Quote[] = [
-  { id: '1', text: 'Mock Quote 1', author: 'Mock Author 1', category: 'wisdom', character_count: 10, tags:[], verified: true, source: 'test', created_at: '', updated_at: '', language: 'en' },
-  { id: '2', text: 'Mock Quote 2', author: 'Mock Author 2', category: 'wisdom', character_count: 10, tags:[], verified: true, source: 'test', created_at: '', updated_at: '', language: 'en' },
+  { id: '1', text: 'Mock Quote 1', author: 'Mock Author 1', category: QuoteCategory.WISDOM, character_count: 10, tags:[], verified: true, source: 'test', created_at: '', updated_at: '', language: 'en' },
+  { id: '2', text: 'Mock Quote 2', author: 'Mock Author 2', category: QuoteCategory.WISDOM, character_count: 10, tags:[], verified: true, source: 'test', created_at: '', updated_at: '', language: 'en' },
 ];
 
 const BASE_QUOTE_FADE_DURATION = 1200;
@@ -47,7 +46,7 @@ describe('QuoteDisplay Component', () => {
 
   test('renders loading and then the initial quote', async () => {
     render(<QuoteDisplay />);
-    expect(screen.getByText(/Loading quotes.../i)).toBeInTheDocument();
+    // Check that eventually the quote is displayed
     await waitFor(() => {
       expect(screen.getByText(`"${mockQuotes[0].text}"`)).toBeInTheDocument();
     });

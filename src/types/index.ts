@@ -22,3 +22,8 @@ export interface Quote {
   character_count: number;
   tags: string[];
 }
+
+export interface GradientDefinition {
+  angle: string;
+  colors: string[];
+}
