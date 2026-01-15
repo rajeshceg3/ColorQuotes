@@ -8,6 +8,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
+        serif: ['"Playfair Display"', 'serif'],
       },
       colors: {
         'ive-blue-1': '#007aff',
@@ -28,9 +29,11 @@ export default {
         'ive-teal-2': '#a7e5f8',
         'ive-yellow-1': '#ffcc00',
         'ive-yellow-2': '#ffe580',
-        'muted-dark-canvas': '#2C3E50',
+        'glass-border': 'rgba(255, 255, 255, 0.2)',
+        'glass-surface': 'rgba(255, 255, 255, 0.1)',
       },
       fontSize: {
+        'quote-hero': ['4rem', { lineHeight: '1.1', letterSpacing: '-0.02em' }], // Bigger for desktop
         'quote-lg': ['2.5rem', { lineHeight: '1.2', letterSpacing: '-0.02em' }],
         'quote-md': ['2rem', { lineHeight: '1.3', letterSpacing: '-0.01em' }],
         'quote-sm': ['1.5rem', { lineHeight: '1.4', letterSpacing: '-0.01em' }],
@@ -50,13 +53,15 @@ export default {
         'glass-sm': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
         'glass-md': '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
         'glass-lg': '0 20px 40px -5px rgba(0, 0, 0, 0.2), 0 10px 20px -5px rgba(0, 0, 0, 0.1)',
+        'glass-pro': '0 25px 50px -12px rgba(0, 0, 0, 0.25), inset 0 0 0 1px rgba(255, 255, 255, 0.1)',
         'inner-light': 'inset 0 1px 0 0 rgba(255, 255, 255, 0.2)',
-        'glow': '0 0 20px rgba(255, 255, 255, 0.3)',
+        'glow': '0 0 40px rgba(255, 255, 255, 0.1)', // Subtler glow
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-out forwards',
         'slide-up': 'slideUp 0.5s ease-out forwards',
-        'float': 'float 6s ease-in-out infinite',
+        'float-slow': 'float 8s ease-in-out infinite',
+        'pulse-subtle': 'pulseSubtle 4s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
@@ -69,8 +74,12 @@ export default {
         },
         float: {
           '0%, 100%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-10px)' },
+          '50%': { transform: 'translateY(-15px)' },
         },
+        pulseSubtle: {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.7' },
+        }
       },
     },
   },
