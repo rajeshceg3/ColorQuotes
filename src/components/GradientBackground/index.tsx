@@ -3,8 +3,8 @@ import { GradientService, GradientDefinition } from '../../services/GradientServ
 import { getReducedMotionDuration } from '../../utils/motion';
 import { usePageVisibility } from '../../utils/usePageVisibility';
 
-const BASE_GRADIENT_TRANSITION_DURATION = 2000;
-const GRADIENT_CHANGE_INTERVAL = 15000;
+const BASE_GRADIENT_TRANSITION_DURATION = 3000; // Slower, more dreamy
+const GRADIENT_CHANGE_INTERVAL = 20000; // 20 seconds
 const FALLBACK_GRADIENT_CLASSES = 'bg-gray-800';
 
 const GradientBackground: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -71,7 +71,7 @@ const GradientBackground: React.FC<{ children: React.ReactNode }> = ({ children 
   );
 
   return (
-    <div className="relative min-h-screen w-full">
+    <div className="relative min-h-screen w-full overflow-hidden bg-black">
       <div
         data-testid="gradient-bg-1"
         className={`absolute inset-0 ${bgClasses[0]}`}
@@ -90,16 +90,17 @@ const GradientBackground: React.FC<{ children: React.ReactNode }> = ({ children 
         }}
         aria-hidden="true"
       />
-      {/* Noise Texture Overlay */}
+      {/* Refined Noise Texture Overlay - Slightly lower opacity for clarity */}
       <div
-        className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay"
+        className="absolute inset-0 opacity-[0.02] pointer-events-none mix-blend-overlay"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
         }}
         aria-hidden="true"
       />
 
-      <div className="relative min-h-screen w-full flex flex-col items-center justify-center isolate">
+      {/* Main Content Wrapper - Ensures full bleed */}
+      <div className="relative w-full h-full isolate">
         {children}
       </div>
     </div>
