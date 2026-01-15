@@ -3,9 +3,10 @@ import React from 'react';
 interface FavoriteIconProps {
   isFavorited: boolean;
   onClick?: (event: React.MouseEvent) => void;
+  className?: string;
 }
 
-const FavoriteIcon: React.FC<FavoriteIconProps> = ({ isFavorited, onClick }) => {
+const FavoriteIcon: React.FC<FavoriteIconProps> = ({ isFavorited, onClick, className = '' }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -13,7 +14,7 @@ const FavoriteIcon: React.FC<FavoriteIconProps> = ({ isFavorited, onClick }) => 
       viewBox="0 0 24 24"
       strokeWidth={1.5}
       stroke="currentColor"
-      className={`w-6 h-6 transition-colors duration-300 ${isFavorited ? 'text-red-500' : 'text-current'}`}
+      className={`w-6 h-6 transition-colors duration-300 ${isFavorited ? 'text-red-500' : 'text-current'} ${className}`}
       onClick={onClick}
       aria-label={isFavorited ? 'Unfavorite this quote' : 'Favorite this quote'}
       role="img"
