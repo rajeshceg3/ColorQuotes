@@ -40,7 +40,12 @@ const QuoteDisplay: React.FC = () => {
       try {
         const service = await QuoteService.getInstance();
         setQuoteService(service);
-        setCurrentQuote(service.getRandomQuote());
+        let quote = service.getRandomQuote();
+        if (!quote) {
+          service.resetViewedQuotes();
+          quote = service.getRandomQuote();
+        }
+        setCurrentQuote(quote);
       } catch (err) {
         console.error('Failed to initialize QuoteService:', err);
         setError('Could not load quotes. Please try again later.');
