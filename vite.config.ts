@@ -10,25 +10,25 @@ export default defineConfig({
     {
       name: 'mock-api-server',
       configureServer(server) {
-        server.middlewares.use('/api/quotes', (req, res, next) => {
+        server.middlewares.use('/api/quotes', (req, res) => {
           try {
             const jsonPath = path.resolve('./src/data/quotes.json');
             const data = fs.readFileSync(jsonPath, 'utf-8');
             res.setHeader('Content-Type', 'application/json');
             res.end(data);
-          } catch (error) {
+          } catch {
             res.statusCode = 500;
             res.end(JSON.stringify({ error: 'Failed to load quote data from mock API' }));
           }
         });
 
-        server.middlewares.use('/api/gradients', (req, res, next) => {
+        server.middlewares.use('/api/gradients', (req, res) => {
           try {
             const jsonPath = path.resolve('./src/data/gradients.json');
             const data = fs.readFileSync(jsonPath, 'utf-8');
             res.setHeader('Content-Type', 'application/json');
             res.end(data);
-          } catch (error) {
+          } catch {
             res.statusCode = 500;
             res.end(JSON.stringify({ error: 'Failed to load gradient data from mock API' }));
           }

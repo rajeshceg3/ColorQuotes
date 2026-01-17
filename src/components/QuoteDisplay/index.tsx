@@ -190,7 +190,7 @@ const QuoteDisplay: React.FC = () => {
     if (navigator.share) {
       try {
         await navigator.share({ title: 'Inspiration', text: text });
-      } catch (err) { /* ignore dismissals */ }
+      } catch { /* ignore dismissals */ }
     } else {
       handleCopyQuote(event);
     }
@@ -203,7 +203,7 @@ const QuoteDisplay: React.FC = () => {
     try {
       await navigator.clipboard.writeText(textToCopy);
       showToast('Copied to Clipboard');
-    } catch (err) {
+    } catch {
       showToast('Failed to copy');
     }
   };
