@@ -5,7 +5,7 @@ import pluginReactConfig from "eslint-plugin-react/configs/recommended.js";
 
 export default [
   {
-    ignores: ["__mocks__/*", "scripts/*"],
+    ignores: ["__mocks__/*", "scripts/*", "dist/*"],
   },
   { languageOptions: { globals: globals.browser } },
   pluginJs.configs.recommended,
@@ -22,6 +22,12 @@ export default [
     rules: {
       "react/react-in-jsx-scope": "off",
       "react/jsx-uses-react": "off",
+    },
+  },
+  {
+    files: ["api/**/*.js"],
+    languageOptions: {
+      globals: globals.node,
     },
   },
 ];

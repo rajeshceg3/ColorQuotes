@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/__mocks__/services/QuoteService.ts
 
 // This is the mock implementation for the QuoteService.

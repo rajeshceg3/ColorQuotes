@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { QuoteService } from './QuoteService';
 
 // Mock global fetch

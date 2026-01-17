@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/__mocks__/services/GradientService.ts
 
 const mockGenerateGradient = jest.fn();
