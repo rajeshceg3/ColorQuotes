@@ -11,6 +11,14 @@ export default {
         sans: ['Inter', 'sans-serif'],
         serif: ['"Playfair Display"', 'serif'],
       },
+      letterSpacing: {
+        tighter: '-0.05em',
+        tight: '-0.025em',
+        normal: '0',
+        wide: '0.025em',
+        wider: '0.05em',
+        widest: '0.1em',
+      },
       colors: {
         'ive-blue-1': '#007aff',
         'ive-blue-2': '#5ac8fa',
@@ -34,7 +42,7 @@ export default {
         'glass-surface': 'rgba(255, 255, 255, 0.1)',
       },
       fontSize: {
-        'quote-hero': ['4rem', { lineHeight: '1.1', letterSpacing: '-0.02em' }], // Bigger for desktop
+        'quote-hero': ['4rem', { lineHeight: '1.1', letterSpacing: '-0.02em' }],
         'quote-lg': ['2.5rem', { lineHeight: '1.2', letterSpacing: '-0.02em' }],
         'quote-md': ['2rem', { lineHeight: '1.3', letterSpacing: '-0.01em' }],
         'quote-sm': ['1.5rem', { lineHeight: '1.4', letterSpacing: '-0.01em' }],
@@ -42,13 +50,8 @@ export default {
         'attrib-md': ['1rem', { lineHeight: '1.4', letterSpacing: '0.05em' }],
         'attrib-sm': ['0.875rem', { lineHeight: '1.4', letterSpacing: '0.05em' }],
       },
-      letterSpacing: {
-        tighter: '-0.05em',
-        tight: '-0.025em',
-        normal: '0',
-        wide: '0.025em',
-        wider: '0.05em',
-        widest: '0.1em',
+      screens: {
+        'xs': '480px',
       },
       boxShadow: {
         'glass-sm': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
@@ -56,7 +59,7 @@ export default {
         'glass-lg': '0 20px 40px -5px rgba(0, 0, 0, 0.2), 0 10px 20px -5px rgba(0, 0, 0, 0.1)',
         'glass-pro': '0 25px 50px -12px rgba(0, 0, 0, 0.25), inset 0 0 0 1px rgba(255, 255, 255, 0.1)',
         'inner-light': 'inset 0 1px 0 0 rgba(255, 255, 255, 0.2)',
-        'glow': '0 0 40px rgba(255, 255, 255, 0.1)', // Subtler glow
+        'glow': '0 0 40px rgba(255, 255, 255, 0.1)',
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-out forwards',

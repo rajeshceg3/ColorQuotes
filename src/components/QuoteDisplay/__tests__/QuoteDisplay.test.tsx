@@ -1,12 +1,23 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import QuoteDisplay from '../index';
 import { QuoteService } from '../../../services/QuoteService';
+import { Quote } from '../../../types';
+import { usePageVisibility } from '../../../utils/usePageVisibility';
 
-// Mock the dependencies
+// Mock the services and hooks
 jest.mock('../../../services/QuoteService');
-jest.mock('../../../utils/usePageVisibility', () => ({
-  usePageVisibility: () => true,
-}));
+jest.mock('../../../utils/usePageVisibility');
+
+const mockedQuoteService = QuoteService as jest.Mocked<typeof QuoteService>;
+const mockedUsePageVisibility = usePageVisibility as jest.Mock;
+
+const mockQuotes: Quote[] = [
+  { id: '1', text: 'Mock Quote 1', author: 'Mock Author 1', category: 'wisdom' },
+  { id: '2', text: 'Mock Quote 2', author: 'Mock Author 2', category: 'wisdom' },
+];
+
+const BASE_QUOTE_FADE_DURATION = 1200;
 
 // Mock clipboard
 const mockClipboard = {
@@ -17,65 +28,132 @@ Object.assign(navigator, {
   share: jest.fn(),
 });
 
-describe('QuoteDisplay', () => {
-  const mockQuote = {
-    id: '1',
-    text: 'Test Quote',
-    author: 'Test Author',
-    category: 'Test',
-  };
-
-  const mockQuoteService = {
-    getRandomQuote: jest.fn().mockReturnValue(mockQuote),
-    isQuoteFavorited: jest.fn().mockReturnValue(false),
-    addFavorite: jest.fn(),
-    removeFavorite: jest.fn(),
-    resetViewedQuotes: jest.fn(),
-  };
+describe('QuoteDisplay Component', () => {
 
   beforeEach(() => {
+    jest.useFakeTimers();
     jest.clearAllMocks();
-    (QuoteService.getInstance as jest.Mock).mockResolvedValue(mockQuoteService);
+    mockedUsePageVisibility.mockReturnValue(true);
+
+    // Default successful mock
+    const mockGetInstance = () => Promise.resolve({
+      getRandomQuote: jest.fn()
+        .mockReturnValueOnce(mockQuotes[0])
+        .mockReturnValue(mockQuotes[1]),
+      isQuoteFavorited: jest.fn().mockReturnValue(false),
+      addFavorite: jest.fn(),
+      removeFavorite: jest.fn(),
+      resetViewedQuotes: jest.fn(),
+    });
+
+    (mockedQuoteService.getInstance as jest.Mock).mockImplementation(mockGetInstance);
   });
 
-  it('renders the initial quote', async () => {
-    render(<QuoteDisplay />);
+  afterEach(() => {
+    jest.useRealTimers();
+  });
 
+  test('renders loading and then the initial quote', async () => {
+    render(<QuoteDisplay />);
     await waitFor(() => {
-      expect(screen.getByText('Test Quote')).toBeInTheDocument();
-      expect(screen.getByText('Test Author')).toBeInTheDocument();
+      expect(screen.getByText(`"${mockQuotes[0].text}"`)).toBeInTheDocument();
     });
   });
 
-  it('handles favorite toggle', async () => {
+  test('displays a new quote on click after fade animation', async () => {
     render(<QuoteDisplay />);
+    await waitFor(() => expect(screen.getByText(`"${mockQuotes[0].text}"`)).toBeInTheDocument());
 
-    await waitFor(() => screen.getByText('Test Quote'));
-
-    const favoriteBtn = screen.getByTitle('Add to Favorites');
-    fireEvent.click(favoriteBtn);
-
-    expect(mockQuoteService.addFavorite).toHaveBeenCalledWith('1');
-
-    // UI update might be optimistic, but here we mock the service logic
-    // We expect the button title to change if we were testing internal state updates that rely on service.
-    // However, our component updates local state immediately.
+    act(() => {
+        const displayArea = screen.getByLabelText(/Display next quote/i);
+        fireEvent.click(displayArea);
+        jest.advanceTimersByTime(BASE_QUOTE_FADE_DURATION);
+    });
 
     await waitFor(() => {
-        expect(screen.getByText('Added to Favorites')).toBeInTheDocument();
+      expect(screen.getByText(`"${mockQuotes[1].text}"`)).toBeInTheDocument();
     });
   });
 
-  it('handles copy to clipboard', async () => {
+  test('shows an error message if the service fails to load', async () => {
+    (mockedQuoteService.getInstance as jest.Mock).mockRejectedValue(new Error('Failed to load'));
     render(<QuoteDisplay />);
-    await waitFor(() => screen.getByText('Test Quote'));
-
-    const copyBtn = screen.getByTitle('Copy to Clipboard');
-    fireEvent.click(copyBtn);
-
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith('"Test Quote" — Test Author');
     await waitFor(() => {
-        expect(screen.getByText('Copied to Clipboard')).toBeInTheDocument();
+      expect(screen.getByText(/Could not load quotes/i)).toBeInTheDocument();
     });
+  });
+
+  test('shows "all quotes seen" toast and resets', async () => {
+    const mockGetInstance = () => Promise.resolve({
+      getRandomQuote: jest.fn()
+        .mockReturnValueOnce(mockQuotes[0])
+        .mockReturnValueOnce(null)
+        .mockReturnValue(mockQuotes[0]),
+      isQuoteFavorited: jest.fn().mockReturnValue(false),
+      addFavorite: jest.fn(),
+      removeFavorite: jest.fn(),
+      resetViewedQuotes: jest.fn(),
+    });
+    (mockedQuoteService.getInstance as jest.Mock).mockImplementation(mockGetInstance);
+
+    render(<QuoteDisplay />);
+    await waitFor(() => expect(screen.getByText(`"${mockQuotes[0].text}"`)).toBeInTheDocument());
+
+    act(() => {
+      const displayArea = screen.getByLabelText(/Display next quote/i);
+      fireEvent.click(displayArea);
+      jest.advanceTimersByTime(BASE_QUOTE_FADE_DURATION);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(/Cycle complete/i)).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+        expect(screen.getByText(`"${mockQuotes[0].text}"`)).toBeInTheDocument();
+    });
+  });
+
+  test('handles favorite toggle', async () => {
+      const addFavoriteMock = jest.fn();
+      const mockGetInstance = () => Promise.resolve({
+          getRandomQuote: jest.fn().mockReturnValue(mockQuotes[0]),
+          isQuoteFavorited: jest.fn().mockReturnValue(false),
+          addFavorite: addFavoriteMock,
+          removeFavorite: jest.fn(),
+          resetViewedQuotes: jest.fn(),
+      });
+      (mockedQuoteService.getInstance as jest.Mock).mockImplementation(mockGetInstance);
+
+      render(<QuoteDisplay />);
+      await waitFor(() => screen.getByText(`"${mockQuotes[0].text}"`));
+
+      const favoriteBtns = screen.getAllByLabelText(/Favorite/i);
+
+      act(() => {
+          fireEvent.click(favoriteBtns[0]);
+      });
+
+      expect(addFavoriteMock).toHaveBeenCalledWith(mockQuotes[0].id);
+
+      await waitFor(() => {
+          expect(screen.getByText(/Added to favorites/i)).toBeInTheDocument();
+      });
+  });
+
+  test('handles copy to clipboard', async () => {
+      render(<QuoteDisplay />);
+      await waitFor(() => screen.getByText(`"${mockQuotes[0].text}"`));
+
+      const copyBtns = screen.getAllByLabelText(/Copy quote/i);
+
+      act(() => {
+          fireEvent.click(copyBtns[0]);
+      });
+
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(`"${mockQuotes[0].text}" — ${mockQuotes[0].author}`);
+      await waitFor(() => {
+          expect(screen.getByText(/Copied to clipboard/i)).toBeInTheDocument();
+      });
   });
 });
