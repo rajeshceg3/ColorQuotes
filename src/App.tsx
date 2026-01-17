@@ -5,11 +5,7 @@ import GradientBackground from './components/GradientBackground';
 function App() {
   return (
     <GradientBackground>
-      {/*
-        Main Container
-        Simplifying layout to allow QuoteDisplay to handle its own full-viewport logic.
-      */}
-      <main className="w-full h-full">
+      <main className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center h-full">
         <QuoteDisplay />
       </main>
     </GradientBackground>

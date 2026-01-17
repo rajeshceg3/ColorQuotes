@@ -1,12 +1,14 @@
 
 > inspirational-quote-app@0.0.0 dev
-> vite
+> vite --port 3000
 
 
-  VITE v4.5.14  ready in 710 ms
+  VITE v4.5.14  ready in 329 ms
 
-  ➜  Local:   http://localhost:5173/
+  ➜  Local:   http://localhost:3000/
   ➜  Network: use --host to expose
 Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
   npx update-browserslist-db@latest
   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+3:56:04 AM [vite] page reload src/components/QuoteDisplay/__tests__/QuoteDisplay.test.tsx
+3:56:11 AM [vite] hmr update /src/components/QuoteDisplay/index.tsx, /src/index.css

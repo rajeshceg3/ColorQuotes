@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { GradientService, GradientDefinition } from '../../services/GradientService';
+import { GradientService } from '../../services/GradientService';
+import { GradientDefinition } from '../../types';
 import { getReducedMotionDuration } from '../../utils/motion';
 import { usePageVisibility } from '../../utils/usePageVisibility';
 
@@ -71,7 +72,7 @@ const GradientBackground: React.FC<{ children: React.ReactNode }> = ({ children 
   );
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-black">
+    <div className="relative min-h-[100dvh] w-full overflow-hidden">
       <div
         data-testid="gradient-bg-1"
         className={`absolute inset-0 ${bgClasses[0]}`}
@@ -99,8 +100,7 @@ const GradientBackground: React.FC<{ children: React.ReactNode }> = ({ children 
         aria-hidden="true"
       />
 
-      {/* Main Content Wrapper - Ensures full bleed */}
-      <div className="relative w-full h-full isolate">
+      <div className="relative min-h-[100dvh] w-full flex flex-col items-center justify-center isolate">
         {children}
       </div>
     </div>
