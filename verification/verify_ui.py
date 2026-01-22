@@ -8,7 +8,7 @@ def verify_ui():
         # Desktop View
         page = browser.new_page(viewport={'width': 1280, 'height': 800})
         try:
-            page.goto("http://localhost:3000", timeout=10000)
+            page.goto("http://localhost:5173", timeout=10000)
             # Wait for any h1 to be visible (quote text)
             page.wait_for_selector("h1", timeout=5000)
             time.sleep(2)
@@ -21,7 +21,7 @@ def verify_ui():
         # Mobile View
         page_mobile = browser.new_page(viewport={'width': 375, 'height': 667})
         try:
-            page_mobile.goto("http://localhost:3000", timeout=10000)
+            page_mobile.goto("http://localhost:5173", timeout=10000)
             page_mobile.wait_for_selector("h1", timeout=5000)
             time.sleep(2)
             page_mobile.screenshot(path="verification/mobile_view.png")

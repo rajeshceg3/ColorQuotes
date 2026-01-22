@@ -1,19 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { QuoteService } from './QuoteService';
 
-// Mock global fetch
-global.fetch = jest.fn(() =>
-  Promise.resolve({
-    ok: true,
-    json: () => Promise.resolve({
-      quotes: [
-          { id: '1', text: 'Test Quote 1', author: 'Author 1' },
-          { id: '2', text: 'Test Quote 2', author: 'Author 2' }
-      ]
-    }),
-  })
-) as jest.Mock;
-
 // Mock localStorage
 const localStorageMock = (() => {
   let store: Record<string, string> = {};
@@ -38,31 +25,17 @@ describe('QuoteService', () => {
     // This is a hack for testing singletons
     (QuoteService as any).instance = null;
     localStorage.clear();
-    (global.fetch as jest.Mock).mockClear();
   });
 
-  it('should initialize and fetch quotes from API', async () => {
+  it('should initialize and load quotes from data', async () => {
     const service = await QuoteService.getInstance();
     expect(service).toBeDefined();
-    expect(global.fetch).toHaveBeenCalledWith('/api/quotes');
 
-    // Verify fallback or fetched data works
     const quote = service.getRandomQuote();
     expect(quote).toBeDefined();
-    // Since we mocked fetch, it should come from there
-    expect(quote?.text).toContain('Test Quote');
-  });
-
-  it('should fallback if API fails', async () => {
-     (global.fetch as jest.Mock).mockImplementationOnce(() =>
-        Promise.reject('API Error')
-     );
-
-     const service = await QuoteService.getInstance();
-     const quote = service.getRandomQuote();
-     // Should fallback to hardcoded list
-     expect(quote).toBeDefined();
-     expect(quote?.text).toBeDefined();
+    // Verify it's not empty
+    expect(quote?.text).toBeTruthy();
+    expect(quote?.author).toBeTruthy();
   });
 
   it('should persist favorites', async () => {
