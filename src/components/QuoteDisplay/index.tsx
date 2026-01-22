@@ -26,7 +26,7 @@ const QuoteDisplay: React.FC = () => {
   const progressBarRef = useRef<HTMLDivElement>(null);
 
   const quoteIntervalRef = useRef<number | null>(null);
-  const progressIntervalRef = useRef<number | null>(null);
+  const progressAnimationFrameRef = useRef<number | null>(null);
   const isVisible = usePageVisibility();
   const isAnimatingRef = useRef(false);
   const toastTimeoutRef = useRef<number | null>(null);
@@ -118,7 +118,7 @@ const QuoteDisplay: React.FC = () => {
 
   useEffect(() => {
     if (quoteIntervalRef.current) clearInterval(quoteIntervalRef.current);
-    if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+    if (progressAnimationFrameRef.current) cancelAnimationFrame(progressAnimationFrameRef.current);
 
     if (isVisible && currentQuote && quoteService) {
       startTimeRef.current = Date.now();
@@ -128,21 +128,26 @@ const QuoteDisplay: React.FC = () => {
         animateAndChangeQuote(true);
       }, QUOTE_ROTATION_INTERVAL);
 
-      // Smooth progress bar update (60fps) - Direct DOM manipulation for performance
-      progressIntervalRef.current = window.setInterval(() => {
+      // Smooth progress bar update using requestAnimationFrame
+      const updateProgress = () => {
         if (!progressBarRef.current) return;
 
         const elapsed = Date.now() - startTimeRef.current;
         const newProgress = Math.min((elapsed / QUOTE_ROTATION_INTERVAL) * 100, 100);
 
-        // Direct DOM update avoids React re-renders
         progressBarRef.current.style.width = `${newProgress}%`;
-      }, 16);
+
+        if (isVisible) { // Only continue if visible
+             progressAnimationFrameRef.current = requestAnimationFrame(updateProgress);
+        }
+      };
+
+      progressAnimationFrameRef.current = requestAnimationFrame(updateProgress);
     }
 
     return () => {
       if (quoteIntervalRef.current) clearInterval(quoteIntervalRef.current);
-      if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+      if (progressAnimationFrameRef.current) cancelAnimationFrame(progressAnimationFrameRef.current);
       if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
     };
   }, [currentQuote, quoteService, animateAndChangeQuote, isVisible]);
@@ -207,7 +212,8 @@ const QuoteDisplay: React.FC = () => {
           text: text,
         });
       } catch (err) {
-        console.log('Error sharing:', err);
+        console.warn('Error sharing, falling back to copy:', err);
+        handleCopyQuote(event);
       }
     } else {
       handleCopyQuote(event);
@@ -256,7 +262,7 @@ const QuoteDisplay: React.FC = () => {
         aria-label="Display next quote"
       >
         <div
-          className="flex flex-col items-center justify-center min-h-[40vh] sm:min-h-[300px]"
+          className="flex flex-col items-center justify-center min-h-[40vh] sm:min-h-[300px] pb-32 sm:pb-0"
         >
           {/* Quote Text */}
           <div
@@ -292,8 +298,8 @@ const QuoteDisplay: React.FC = () => {
           </div>
 
           {/* Hint for "Next Quote" - subtle indicator */}
-          <div className={`absolute bottom-8 left-1/2 -translate-x-1/2 text-white/40 text-sm font-medium tracking-wider uppercase opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`}>
-            Click for next quote
+          <div className={`absolute bottom-32 sm:bottom-8 left-1/2 -translate-x-1/2 text-white/40 text-sm font-medium tracking-wider uppercase opacity-60 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`}>
+            Tap for next quote
           </div>
         </div>
 

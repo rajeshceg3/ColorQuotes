@@ -1,5 +1,18 @@
 // src/types/index.ts
-export type QuoteCategory = 'wisdom' | 'motivation' | 'life' | 'philosophy' | 'art' | 'science';
+export type QuoteCategory =
+  | 'wisdom'
+  | 'motivation'
+  | 'motivational'
+  | 'life'
+  | 'philosophy'
+  | 'art'
+  | 'science'
+  | 'success'
+  | 'creativity'
+  | 'happiness'
+  | 'leadership'
+  | 'perseverance'
+  | 'general';
 
 export interface Quote {
   id: string;

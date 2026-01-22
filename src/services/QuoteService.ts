@@ -1,4 +1,5 @@
 import { Quote } from '../types';
+import quotesData from '../data/quotes.json';
 
 const STORAGE_KEYS = {
   FAVORITES: 'quote-app-favorites',
@@ -30,11 +31,8 @@ export class QuoteService {
       if (this.isInitialized) return;
 
       try {
-          const response = await fetch('/api/quotes');
-          if (!response.ok) throw new Error('Failed to fetch quotes');
-          const data = await response.json();
-          // The JSON structure is { quotes: [...] }
-          this.quotes = data.quotes || [];
+          // Direct import from JSON
+          this.quotes = (quotesData.quotes as unknown) as Quote[];
       } catch (error) {
           console.error("QuoteService init failed, using fallback", error);
           this.quotes = [

@@ -1,4 +1,5 @@
 import { GradientDefinition } from '../types';
+import gradientsData from '../data/gradients.json';
 
 interface ApiGradient {
     type: string;
@@ -39,9 +40,7 @@ export class GradientService {
       if (this.isInitialized) return;
 
       try {
-          const response = await fetch('/api/gradients');
-          if (!response.ok) throw new Error('Failed to fetch gradients');
-          const data = await response.json();
+          const data = gradientsData;
 
           if (data.gradients && Array.isArray(data.gradients)) {
              this.gradients = data.gradients.map((g: ApiGradient) => ({
