@@ -275,7 +275,7 @@ const QuoteDisplay: React.FC = () => {
             <h1
               className={`
                 text-3xl sm:text-4xl md:text-5xl lg:text-quote-lg
-                font-bold text-white tracking-tighter leading-tight text-center
+                font-serif font-bold text-white tracking-tighter leading-tight text-center
                 text-balance drop-shadow-sm select-none
                 ${isQuoteVisible ? 'animate-fade-in-up' : ''}
               `}
@@ -293,12 +293,12 @@ const QuoteDisplay: React.FC = () => {
                 ${isQuoteVisible ? 'animate-fade-in-up-delay-1' : ''}
               `}
             >
-              {currentQuote.author}
+              — {currentQuote.author}
             </p>
           </div>
 
           {/* Hint for "Next Quote" - subtle indicator */}
-          <div className={`absolute bottom-32 sm:bottom-8 left-1/2 -translate-x-1/2 text-white/40 text-sm font-medium tracking-wider uppercase opacity-60 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`}>
+          <div className={`absolute bottom-32 sm:bottom-8 left-1/2 -translate-x-1/2 text-white/80 drop-shadow-sm text-sm font-medium tracking-wider uppercase sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`}>
             Tap for next quote
           </div>
         </div>
