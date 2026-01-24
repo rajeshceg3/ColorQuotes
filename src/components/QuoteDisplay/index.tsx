@@ -45,7 +45,11 @@ const QuoteDisplay: React.FC = () => {
           service.resetViewedQuotes();
           quote = service.getRandomQuote();
         }
-        setCurrentQuote(quote);
+        if (quote) {
+          setCurrentQuote(quote);
+        } else {
+          setError('No quotes available.');
+        }
       } catch (err) {
         console.error('Failed to initialize QuoteService:', err);
         setError('Could not load quotes. Please try again later.');
@@ -100,6 +104,8 @@ const QuoteDisplay: React.FC = () => {
       // Reset timer start time
       startTimeRef.current = Date.now();
       if (progressBarRef.current) progressBarRef.current.style.width = '0%';
+    } else {
+      setError('No quotes available.');
     }
   }, [quoteService]);
 
@@ -298,8 +304,9 @@ const QuoteDisplay: React.FC = () => {
           </div>
 
           {/* Hint for "Next Quote" - subtle indicator */}
-          <div className={`absolute bottom-32 sm:bottom-8 left-1/2 -translate-x-1/2 text-white/80 drop-shadow-sm text-sm font-medium tracking-wider uppercase sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`}>
-            Tap for next quote
+          <div className={`absolute bottom-32 sm:bottom-8 left-1/2 -translate-x-1/2 text-white drop-shadow-md text-sm font-medium tracking-wider uppercase sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`}>
+            <span className="sm:hidden">Tap for next quote</span>
+            <span className="hidden sm:inline">Click for next quote</span>
           </div>
         </div>
 
