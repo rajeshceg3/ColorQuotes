@@ -1,5 +1,19 @@
-import { Quote } from '../types';
+import { Quote, QuoteCategory } from '../types';
 import quotesData from '../data/quotes.json';
+
+interface RawQuote {
+  id: string;
+  text: string;
+  author: string;
+  category: string;
+  source?: string;
+  verified?: boolean;
+  created_at?: string;
+  updated_at?: string;
+  language?: string;
+  character_count?: number;
+  tags?: string[];
+}
 
 const STORAGE_KEYS = {
   FAVORITES: 'quote-app-favorites',
@@ -32,7 +46,13 @@ export class QuoteService {
 
       try {
           // Direct import from JSON
-          this.quotes = (quotesData.quotes as unknown) as Quote[];
+          const rawQuotes = quotesData.quotes as RawQuote[];
+          this.quotes = rawQuotes.map(q => ({
+            id: q.id,
+            text: q.text,
+            author: q.author,
+            category: q.category as QuoteCategory
+          }));
       } catch (error) {
           console.error("QuoteService init failed, using fallback", error);
           this.quotes = [
