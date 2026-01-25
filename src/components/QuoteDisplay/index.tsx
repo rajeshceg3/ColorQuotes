@@ -277,6 +277,8 @@ const QuoteDisplay: React.FC = () => {
                opacity: isQuoteVisible ? 1 : 0,
                transform: isQuoteVisible ? 'translateY(0) scale(1)' : 'translateY(8px) scale(0.98)'
              }}
+             aria-live="polite"
+             aria-atomic="true"
           >
             <h1
               className={`
@@ -304,7 +306,7 @@ const QuoteDisplay: React.FC = () => {
           </div>
 
           {/* Hint for "Next Quote" - subtle indicator */}
-          <div className={`absolute bottom-32 sm:bottom-8 left-1/2 -translate-x-1/2 text-white drop-shadow-md text-sm font-medium tracking-wider uppercase sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`}>
+          <div className={`absolute bottom-40 sm:bottom-8 left-1/2 -translate-x-1/2 text-white drop-shadow-md text-sm font-medium tracking-wider uppercase sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`}>
             <span className="sm:hidden">Tap for next quote</span>
             <span className="hidden sm:inline">Click for next quote</span>
           </div>
