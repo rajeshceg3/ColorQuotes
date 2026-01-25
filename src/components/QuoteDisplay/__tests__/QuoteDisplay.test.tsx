@@ -76,11 +76,13 @@ describe('QuoteDisplay Component', () => {
   });
 
   test('shows an error message if the service fails to load', async () => {
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     (mockedQuoteService.getInstance as jest.Mock).mockRejectedValue(new Error('Failed to load'));
     render(<QuoteDisplay />);
     await waitFor(() => {
       expect(screen.getByText(/Could not load quotes/i)).toBeInTheDocument();
     });
+    consoleSpy.mockRestore();
   });
 
   test('shows "all quotes seen" toast and resets', async () => {
