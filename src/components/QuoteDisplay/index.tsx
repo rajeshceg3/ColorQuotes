@@ -261,14 +261,17 @@ const QuoteDisplay: React.FC = () => {
         style={{
           transform: `rotateX(${-tilt.y}deg) rotateY(${tilt.x}deg)`,
         }}
-        role="button"
-        tabIndex={0}
-        onClick={handleInteraction}
-        onKeyDown={handleKeyDown}
-        aria-label="Display next quote"
       >
+        <button
+          type="button"
+          className="absolute inset-0 w-full h-full z-0 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-white/50 rounded-[2rem] bg-transparent border-none"
+          onClick={handleInteraction}
+          onKeyDown={handleKeyDown}
+          aria-label="Display next quote"
+        />
+
         <div
-          className="flex flex-col items-center justify-center min-h-[40vh] sm:min-h-[300px] pb-32 sm:pb-0"
+          className="relative z-10 pointer-events-none flex flex-col items-center justify-center min-h-[40vh] sm:min-h-[300px] pb-32 sm:pb-0"
         >
           {/* Quote Text */}
           <div
@@ -297,7 +300,7 @@ const QuoteDisplay: React.FC = () => {
               className={`
                 text-lg sm:text-xl md:text-2xl
                 font-medium text-white/90 tracking-widest uppercase text-center
-                drop-shadow-sm
+                drop-shadow-sm select-none
                 ${isQuoteVisible ? 'animate-fade-in-up-delay-1' : ''}
               `}
             >
@@ -322,7 +325,7 @@ const QuoteDisplay: React.FC = () => {
         </div>
 
         {/* Desktop Controls (Bottom Right) */}
-        <div className="hidden sm:flex absolute bottom-8 right-8 items-center space-x-3 z-10">
+        <div className="hidden sm:flex absolute bottom-8 right-8 items-center space-x-3 z-20 pointer-events-auto">
           <IconButton
             icon={<FavoriteIcon isFavorited={isFavorited} />}
             onClick={handleToggleFavorite}
