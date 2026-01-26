@@ -32,11 +32,13 @@ describe('LocalStorageService', () => {
     localStorageMock.clear();
     // Spy on console.error to check for error logging
     jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
   afterEach(() => {
     // Restore console.error mock
     (console.error as jest.Mock).mockRestore();
+    (console.warn as jest.Mock).mockRestore();
   });
 
   describe('setItem', () => {
