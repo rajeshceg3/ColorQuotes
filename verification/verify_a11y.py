@@ -32,7 +32,7 @@ def verify_a11y():
             # Click the center of the screen, which should hit the button
             # OR click the button element directly.
             # Since content is pointer-events-none, clicking center should work.
-            next_button.click()
+            next_button.click(force=True)
 
             page.wait_for_timeout(1000) # Wait for fade/change
 

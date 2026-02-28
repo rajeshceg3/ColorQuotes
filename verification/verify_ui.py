@@ -9,7 +9,8 @@ def verify_ui():
         page.wait_for_selector("text=Click for next quote", state="attached") # Attached but hidden
 
         # Hover to show hint
-        page.hover('div[role="button"]')
+        # Hover the card. Use force since the toast notification also uses glass-panel and might be animating
+        page.hover('.sm\\:glass-panel', force=True)
         page.wait_for_timeout(500) # Wait for transition
 
         page.screenshot(path="verification/verification_desktop.png")
