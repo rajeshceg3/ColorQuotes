@@ -75,7 +75,7 @@ const GradientBackground: React.FC<{ children: React.ReactNode }> = ({ children 
     <div className="relative min-h-[100dvh] w-full overflow-hidden">
       <div
         data-testid="gradient-bg-1"
-        className={`absolute inset-0 ${bgClasses[0]}`}
+        className={`absolute inset-0 bg-[length:200%_200%] animate-bg-pan ${bgClasses[0]}`}
         style={{
           opacity: activeGradientIndex === 0 ? 1 : 0,
           transition: `opacity ${gradientTransitionDuration}ms ease-in-out`,
@@ -84,7 +84,7 @@ const GradientBackground: React.FC<{ children: React.ReactNode }> = ({ children 
       />
       <div
         data-testid="gradient-bg-2"
-        className={`absolute inset-0 ${bgClasses[1]}`}
+        className={`absolute inset-0 bg-[length:200%_200%] animate-bg-pan ${bgClasses[1]}`}
         style={{
           opacity: activeGradientIndex === 1 ? 1 : 0,
           transition: `opacity ${gradientTransitionDuration}ms ease-in-out`,
