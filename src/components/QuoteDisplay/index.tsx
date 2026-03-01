@@ -20,6 +20,10 @@ const QuoteDisplay: React.FC = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [allQuotesSeen, setAllQuotesSeen] = useState(false);
 
+  // Swipe Gestures State
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
   // 3D Tilt State
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const cardRef = useRef<HTMLDivElement>(null);
@@ -158,6 +162,29 @@ const QuoteDisplay: React.FC = () => {
     };
   }, [currentQuote, quoteService, animateAndChangeQuote, isVisible]);
 
+  // Haptic feedback helper
+  const triggerHaptic = (type: 'light' | 'medium' | 'heavy' = 'light') => {
+    if (typeof window !== 'undefined' && navigator.vibrate) {
+      try {
+        switch (type) {
+          case 'light':
+            navigator.vibrate(10);
+            break;
+          case 'medium':
+            navigator.vibrate(20);
+            break;
+          case 'heavy':
+            navigator.vibrate([30, 50, 30]);
+            break;
+          default:
+            navigator.vibrate(10);
+        }
+      } catch {
+        // Ignore haptic errors
+      }
+    }
+  };
+
   const showToast = (message: string) => {
     setToastMessage(message);
     if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
@@ -168,7 +195,28 @@ const QuoteDisplay: React.FC = () => {
 
   const handleInteraction = () => {
     if (isAnimatingRef.current || !quoteService) return;
+    triggerHaptic('medium');
     animateAndChangeQuote(false);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe || isRightSwipe) {
+      handleInteraction();
+    }
   };
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -182,6 +230,7 @@ const QuoteDisplay: React.FC = () => {
     event.stopPropagation();
     if (!currentQuote || !quoteService) return;
 
+    triggerHaptic('light');
     const newFavoritedState = !isFavorited;
     setIsFavorited(newFavoritedState);
     if (newFavoritedState) {
@@ -196,6 +245,7 @@ const QuoteDisplay: React.FC = () => {
   const handleCopyQuote = async (event: React.MouseEvent) => {
     event.stopPropagation();
     if (!currentQuote) return;
+    triggerHaptic('light');
     const textToCopy = `"${currentQuote.text}" — ${currentQuote.author}`;
     try {
       await navigator.clipboard.writeText(textToCopy);
@@ -209,6 +259,7 @@ const QuoteDisplay: React.FC = () => {
   const handleShare = async (event: React.MouseEvent) => {
     event.stopPropagation();
     if (!currentQuote) return;
+    triggerHaptic('light');
     const text = `"${currentQuote.text}" — ${currentQuote.author}`;
 
     if (navigator.share) {
@@ -245,10 +296,13 @@ const QuoteDisplay: React.FC = () => {
 
   return (
     <div
-      className="relative w-full flex justify-center"
+      className="relative w-full flex justify-center animate-float-slow"
       style={{ perspective: '1000px' }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
       <div
         ref={cardRef}
@@ -278,7 +332,8 @@ const QuoteDisplay: React.FC = () => {
              className={`transition-all duration-${quoteFadeDuration} ease-out`}
              style={{
                opacity: isQuoteVisible ? 1 : 0,
-               transform: isQuoteVisible ? 'translateY(0) scale(1)' : 'translateY(8px) scale(0.98)'
+               transform: isQuoteVisible ? 'translateY(0) scale(1)' : 'translateY(8px) scale(0.98)',
+               filter: isQuoteVisible ? 'blur(0px)' : 'blur(8px)'
              }}
              aria-live="polite"
              aria-atomic="true"
