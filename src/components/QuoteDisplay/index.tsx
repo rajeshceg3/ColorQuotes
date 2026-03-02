@@ -263,6 +263,8 @@ const QuoteDisplay: React.FC = () => {
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
+    setIsPaused(true);
+    isPausedRef.current = true;
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -270,13 +272,18 @@ const QuoteDisplay: React.FC = () => {
   };
 
   const handleTouchEnd = () => {
+    setIsPaused(false);
+    isPausedRef.current = false;
     if (!touchStart || !touchEnd) return;
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > 50;
     const isRightSwipe = distance < -50;
 
     if (isLeftSwipe || isRightSwipe) {
-      handleInteraction();
+      // Swipe detected, change quote immediately bypassing single tap delay
+      if (isAnimatingRef.current || !quoteService) return;
+      triggerHaptic('medium');
+      animateAndChangeQuote(false);
     }
   };
 
@@ -418,7 +425,7 @@ const QuoteDisplay: React.FC = () => {
                 text-3xl sm:text-4xl md:text-5xl lg:text-quote-lg
                 font-serif font-bold text-white tracking-tighter leading-tight text-center
                 text-balance drop-shadow-sm select-none
-                ${isQuoteVisible ? 'animate-fade-in-up' : ''}
+                ${isQuoteVisible ? 'animate-text-reveal' : ''}
               `}
             >
               &quot;{currentQuote.text}&quot;

@@ -84,6 +84,16 @@
       "type": "linear",
       "angle": "bg-gradient-to-b",
       "colors": ["from-ive-purple-2", "via-ive-blue-1", "to-ive-yellow-1"]
+    },
+    {
+      "type": "linear",
+      "angle": "bg-gradient-to-tr",
+      "colors": ["from-ive-indigo-1", "via-ive-purple-2", "to-ive-pink-1"]
+    },
+    {
+      "type": "linear",
+      "angle": "bg-gradient-to-bl",
+      "colors": ["from-ive-teal-1", "via-ive-blue-2", "to-ive-green-1"]
     }
   ]
 }

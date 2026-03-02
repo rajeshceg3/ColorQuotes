@@ -628,16 +628,67 @@
         "direction",
         "success"
       ]
+    },
+    {
+      "id": "uuid-38",
+      "text": "The mind is just a muscle, the more you exercise it, the stronger it gets and the more it can expand.",
+      "author": "Idowu Koyenikan",
+      "category": "wisdom",
+      "source": "Unknown",
+      "verified": true,
+      "created_at": "2024-08-01T00:00:00Z",
+      "updated_at": "2024-08-01T00:00:00Z",
+      "language": "en",
+      "character_count": 101,
+      "tags": [
+        "mind",
+        "growth",
+        "strength"
+      ]
+    },
+    {
+      "id": "uuid-39",
+      "text": "Do not wait to strike till the iron is hot; but make it hot by striking.",
+      "author": "William Butler Yeats",
+      "category": "motivational",
+      "source": "Unknown",
+      "verified": true,
+      "created_at": "2024-08-01T00:00:00Z",
+      "updated_at": "2024-08-01T00:00:00Z",
+      "language": "en",
+      "character_count": 72,
+      "tags": [
+        "action",
+        "initiative",
+        "opportunity"
+      ]
+    },
+    {
+      "id": "uuid-40",
+      "text": "Whether you think you can, or you think you can't – you're right.",
+      "author": "Henry Ford",
+      "category": "wisdom",
+      "source": "Unknown",
+      "verified": true,
+      "created_at": "2024-08-01T00:00:00Z",
+      "updated_at": "2024-08-01T00:00:00Z",
+      "language": "en",
+      "character_count": 65,
+      "tags": [
+        "mindset",
+        "belief",
+        "truth"
+      ]
     }
   ],
   "metadata": {
-    "total_quotes": 37,
-    "last_updated": "2024-07-31T16:05:07.418876Z",
-    "version": "1.1",
+    "total_quotes": 40,
+    "last_updated": "2024-08-01T00:00:00.000000Z",
+    "version": "1.2",
     "categories": {
       "success": 5,
-      "wisdom": 8,
-      "motivational": 9,
+      "wisdom": 10,
+      "motivational": 10,
       "creativity": 5,
       "happiness": 5,
       "leadership": 2,
