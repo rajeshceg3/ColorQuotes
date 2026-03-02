@@ -24,10 +24,19 @@ const QuoteDisplay: React.FC = () => {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
+  // Pause State
+  const [isPaused, setIsPaused] = useState(false);
+  const isPausedRef = useRef(false);
+
   // 3D Tilt State
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const cardRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
+
+  // Double Tap State
+  const [showHeart, setShowHeart] = useState(false);
+  const lastTapRef = useRef<number>(0);
+  const clickTimeoutRef = useRef<number | null>(null);
 
   const quoteIntervalRef = useRef<number | null>(null);
   const progressAnimationFrameRef = useRef<number | null>(null);
@@ -142,6 +151,11 @@ const QuoteDisplay: React.FC = () => {
       const updateProgress = () => {
         if (!progressBarRef.current) return;
 
+        if (isPausedRef.current) {
+            // If paused, we shift the start time forward so elapsed time doesn't grow
+            startTimeRef.current += Date.now() - (startTimeRef.current + (parseFloat(progressBarRef.current.style.width || '0') / 100) * QUOTE_ROTATION_INTERVAL);
+        }
+
         const elapsed = Date.now() - startTimeRef.current;
         const newProgress = Math.min((elapsed / QUOTE_ROTATION_INTERVAL) * 100, 100);
 
@@ -159,6 +173,7 @@ const QuoteDisplay: React.FC = () => {
       if (quoteIntervalRef.current) clearInterval(quoteIntervalRef.current);
       if (progressAnimationFrameRef.current) cancelAnimationFrame(progressAnimationFrameRef.current);
       if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+      if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
     };
   }, [currentQuote, quoteService, animateAndChangeQuote, isVisible]);
 
@@ -194,9 +209,55 @@ const QuoteDisplay: React.FC = () => {
   };
 
   const handleInteraction = () => {
-    if (isAnimatingRef.current || !quoteService) return;
-    triggerHaptic('medium');
-    animateAndChangeQuote(false);
+    if (isAnimatingRef.current || !quoteService || !currentQuote) return;
+
+    const now = Date.now();
+    const DOUBLE_TAP_DELAY = 300;
+
+    if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
+      // Double tap detected
+      if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
+      lastTapRef.current = 0; // Reset
+
+      triggerHaptic('heavy');
+      const newFavoritedState = !isFavorited;
+      setIsFavorited(newFavoritedState);
+
+      if (newFavoritedState) {
+        quoteService.addFavorite(currentQuote.id);
+        showToast('Added to favorites');
+        // Trigger heart animation
+        setShowHeart(true);
+        setTimeout(() => setShowHeart(false), 800);
+      } else {
+        quoteService.removeFavorite(currentQuote.id);
+        showToast('Removed from favorites');
+      }
+    } else {
+      // Single tap
+      lastTapRef.current = now;
+      if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
+
+      clickTimeoutRef.current = window.setTimeout(() => {
+        triggerHaptic('medium');
+        animateAndChangeQuote(false);
+      }, DOUBLE_TAP_DELAY);
+    }
+  };
+
+  const handlePointerDown = () => {
+      setIsPaused(true);
+      isPausedRef.current = true;
+  };
+
+  const handlePointerUp = () => {
+      setIsPaused(false);
+      isPausedRef.current = false;
+  };
+
+  const handlePointerLeave = () => {
+      setIsPaused(false);
+      isPausedRef.current = false;
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -222,7 +283,10 @@ const QuoteDisplay: React.FC = () => {
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      handleInteraction();
+      // Bypass double tap logic for keyboard events
+      if (isAnimatingRef.current || !quoteService) return;
+      triggerHaptic('medium');
+      animateAndChangeQuote(false);
     }
   };
 
@@ -316,10 +380,21 @@ const QuoteDisplay: React.FC = () => {
           transform: `rotateX(${-tilt.y}deg) rotateY(${tilt.x}deg)`,
         }}
       >
+        {showHeart && (
+          <div className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none">
+            <FavoriteIcon
+              isFavorited={true}
+              className="w-32 h-32 text-white animate-heart-pop drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]"
+            />
+          </div>
+        )}
         <button
           type="button"
           className="absolute inset-0 w-full h-full z-0 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-white/50 rounded-[2rem] bg-transparent border-none"
           onClick={handleInteraction}
+          onPointerDown={handlePointerDown}
+          onPointerUp={handlePointerUp}
+          onPointerLeave={handlePointerLeave}
           onKeyDown={handleKeyDown}
           aria-label="Display next quote"
         />
@@ -374,7 +449,7 @@ const QuoteDisplay: React.FC = () => {
         <div className="absolute bottom-0 left-0 w-full h-1 bg-white/5 overflow-hidden rounded-b-[2rem]">
             <div
                 ref={progressBarRef}
-                className="h-full bg-white/50 shadow-[0_0_15px_rgba(255,255,255,0.8)] transition-all duration-75 ease-linear"
+                className={`h-full bg-white/50 shadow-[0_0_15px_rgba(255,255,255,0.8)] transition-all duration-75 ease-linear ${isPaused ? 'opacity-40' : 'opacity-100'}`}
                 style={{ width: '0%' }}
             />
         </div>
