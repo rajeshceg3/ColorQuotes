@@ -3,6 +3,7 @@ import { Quote } from '../../types';
 import { QuoteService } from '../../services/QuoteService';
 import { getReducedMotionDuration } from '../../utils/motion';
 import { usePageVisibility } from '../../utils/usePageVisibility';
+import SoundService from '../../services/SoundService';
 import FavoriteIcon from '../Icons/FavoriteIcon';
 import CopyIcon from '../Icons/CopyIcon';
 import ShareIcon from '../Icons/ShareIcon';
@@ -28,8 +29,11 @@ const QuoteDisplay: React.FC = () => {
   const [isPaused, setIsPaused] = useState(false);
   const isPausedRef = useRef(false);
 
-  // 3D Tilt State
+  // 3D Tilt & Spotlight State
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
+  const [isHovered, setIsHovered] = useState(false);
+  const tiltRafRef = useRef<number | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
 
@@ -47,10 +51,13 @@ const QuoteDisplay: React.FC = () => {
 
   const quoteFadeDuration = getReducedMotionDuration(BASE_QUOTE_FADE_DURATION);
 
-  // Initialize the QuoteService
+  // Initialize the QuoteService and SoundService
   useEffect(() => {
     const initializeService = async () => {
       try {
+        const soundService = SoundService.getInstance();
+        soundService.init();
+
         const service = await QuoteService.getInstance();
         setQuoteService(service);
         let quote = service.getRandomQuote();
@@ -86,7 +93,7 @@ const QuoteDisplay: React.FC = () => {
     }
   }, [allQuotesSeen]);
 
-  // Handle 3D Tilt on Desktop
+  // Handle 3D Tilt & Spotlight on Desktop
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current || window.innerWidth < 768) return;
 
@@ -94,11 +101,22 @@ const QuoteDisplay: React.FC = () => {
     const x = (e.clientX - left - width / 2) / 25; // Division controls sensitivity
     const y = (e.clientY - top - height / 2) / 25;
 
-    setTilt({ x, y });
+    const mouseX = ((e.clientX - left) / width) * 100;
+    const mouseY = ((e.clientY - top) / height) * 100;
+
+    if (tiltRafRef.current) cancelAnimationFrame(tiltRafRef.current);
+
+    tiltRafRef.current = requestAnimationFrame(() => {
+      setTilt({ x, y });
+      setMousePos({ x: mouseX, y: mouseY });
+      setIsHovered(true);
+    });
   };
 
   const handleMouseLeave = () => {
+    if (tiltRafRef.current) cancelAnimationFrame(tiltRafRef.current);
     setTilt({ x: 0, y: 0 });
+    setIsHovered(false);
   };
 
   const changeQuoteContent = useCallback(() => {
@@ -127,6 +145,10 @@ const QuoteDisplay: React.FC = () => {
 
     isAnimatingRef.current = true;
     setIsQuoteVisible(false);
+
+    if (!isTriggeredByTimer) {
+       SoundService.getInstance().playSwoosh();
+    }
 
     setTimeout(() => {
       changeQuoteContent();
@@ -174,6 +196,7 @@ const QuoteDisplay: React.FC = () => {
       if (progressAnimationFrameRef.current) cancelAnimationFrame(progressAnimationFrameRef.current);
       if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
       if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
+      if (tiltRafRef.current) cancelAnimationFrame(tiltRafRef.current);
     };
   }, [currentQuote, quoteService, animateAndChangeQuote, isVisible]);
 
@@ -225,12 +248,14 @@ const QuoteDisplay: React.FC = () => {
 
       if (newFavoritedState) {
         quoteService.addFavorite(currentQuote.id);
+        SoundService.getInstance().playPop();
         showToast('Added to favorites');
         // Trigger heart animation
         setShowHeart(true);
         setTimeout(() => setShowHeart(false), 800);
       } else {
         quoteService.removeFavorite(currentQuote.id);
+        SoundService.getInstance().playClick();
         showToast('Removed from favorites');
       }
     } else {
@@ -306,9 +331,11 @@ const QuoteDisplay: React.FC = () => {
     setIsFavorited(newFavoritedState);
     if (newFavoritedState) {
       quoteService.addFavorite(currentQuote.id);
+      SoundService.getInstance().playPop();
       showToast('Added to favorites');
     } else {
       quoteService.removeFavorite(currentQuote.id);
+      SoundService.getInstance().playClick();
       showToast('Removed from favorites');
     }
   };
@@ -317,6 +344,7 @@ const QuoteDisplay: React.FC = () => {
     event.stopPropagation();
     if (!currentQuote) return;
     triggerHaptic('light');
+    SoundService.getInstance().playClick();
     const textToCopy = `"${currentQuote.text}" — ${currentQuote.author}`;
     try {
       await navigator.clipboard.writeText(textToCopy);
@@ -331,6 +359,7 @@ const QuoteDisplay: React.FC = () => {
     event.stopPropagation();
     if (!currentQuote) return;
     triggerHaptic('light');
+    SoundService.getInstance().playClick();
     const text = `"${currentQuote.text}" — ${currentQuote.author}`;
 
     if (navigator.share) {
@@ -385,6 +414,9 @@ const QuoteDisplay: React.FC = () => {
         `}
         style={{
           transform: `rotateX(${-tilt.y}deg) rotateY(${tilt.x}deg)`,
+          background: isHovered
+            ? `radial-gradient(circle at ${mousePos.x}% ${mousePos.y}%, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.08) 100%)`
+            : 'rgba(255, 255, 255, 0.08)',
         }}
       >
         {showHeart && (
@@ -408,14 +440,20 @@ const QuoteDisplay: React.FC = () => {
 
         <div
           className="relative z-10 pointer-events-none flex flex-col items-center justify-center min-h-[40vh] sm:min-h-[300px] pb-32 sm:pb-0"
+          style={{ transformStyle: 'preserve-3d' }}
         >
           {/* Quote Text */}
           <div
              className={`transition-all duration-${quoteFadeDuration} ease-out`}
              style={{
                opacity: isQuoteVisible ? 1 : 0,
-               transform: isQuoteVisible ? 'translateY(0) scale(1)' : 'translateY(8px) scale(0.98)',
-               filter: isQuoteVisible ? 'blur(0px)' : 'blur(8px)'
+               transform: `
+                 ${isQuoteVisible ? 'translateY(0) scale(1)' : 'translateY(8px) scale(0.98)'}
+                 translateZ(30px)
+                 translateX(${tilt.x * 0.8}px) translateY(${tilt.y * 0.8}px)
+               `,
+               filter: isQuoteVisible ? 'blur(0px)' : 'blur(8px)',
+               transformStyle: 'preserve-3d'
              }}
              aria-live="polite"
              aria-atomic="true"
@@ -462,7 +500,12 @@ const QuoteDisplay: React.FC = () => {
         </div>
 
         {/* Desktop Controls (Bottom Right) */}
-        <div className="hidden sm:flex absolute bottom-8 right-8 items-center space-x-3 z-20 pointer-events-auto">
+        <div
+          className="hidden sm:flex absolute bottom-8 right-8 items-center space-x-3 z-20 pointer-events-auto transition-transform duration-500 ease-out"
+          style={{
+            transform: `translateZ(20px) translateX(${tilt.x * 0.4}px) translateY(${tilt.y * 0.4}px)`
+          }}
+        >
           <IconButton
             icon={<FavoriteIcon isFavorited={isFavorited} />}
             onClick={handleToggleFavorite}
