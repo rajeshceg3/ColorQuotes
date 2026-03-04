@@ -64,9 +64,35 @@ export class GradientService {
         availableGradients = this.gradients;
     }
 
+    // Time-based filtering
+    const hour = new Date().getHours();
+    let timeFilteredGradients: GradientDefinition[] = [];
+
+    if (hour >= 5 && hour < 12) {
+        // Morning: Prefer yellows, oranges, pinks
+        timeFilteredGradients = availableGradients.filter(g =>
+            g.colors.some(c => c.includes('yellow') || c.includes('orange') || c.includes('pink'))
+        );
+    } else if (hour >= 12 && hour < 18) {
+        // Afternoon: Prefer blues, greens, teals
+        timeFilteredGradients = availableGradients.filter(g =>
+            g.colors.some(c => c.includes('blue') || c.includes('green') || c.includes('teal'))
+        );
+    } else {
+        // Evening/Night: Prefer purples, indigos, dark blues, reds
+        timeFilteredGradients = availableGradients.filter(g =>
+            g.colors.some(c => c.includes('purple') || c.includes('indigo') || c.includes('red'))
+        );
+    }
+
+    // Fallback if time-filtering is too aggressive (e.g., if fallbacks don't have these names)
+    if (timeFilteredGradients.length > 0) {
+        availableGradients = timeFilteredGradients;
+    }
+
     if (exclude) {
-        // Simple exclusion based on the first color
-        const filtered = this.gradients.filter(g =>
+        // Simple exclusion based on the first color, from the currently available gradients
+        const filtered = availableGradients.filter(g =>
             g.colors[0] !== exclude.colors[0]
         );
         if (filtered.length > 0) {

@@ -394,6 +394,12 @@ const QuoteDisplay: React.FC = () => {
     );
   }
 
+  const getQuoteTextClass = (text: string) => {
+    if (text.length < 50) return 'text-4xl sm:text-5xl md:text-6xl lg:text-quote-hero';
+    if (text.length < 120) return 'text-3xl sm:text-4xl md:text-5xl lg:text-quote-lg';
+    return 'text-2xl sm:text-3xl md:text-4xl lg:text-quote-md';
+  };
+
   return (
     <div
       className="relative w-full flex justify-center animate-float-slow"
@@ -425,6 +431,22 @@ const QuoteDisplay: React.FC = () => {
               isFavorited={true}
               className="w-32 h-32 text-white animate-heart-pop drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]"
             />
+            {/* Sparkles */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48">
+              {[...Array(6)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute w-2 h-2 bg-white rounded-full animate-sparkle"
+                  style={{
+                    top: '50%',
+                    left: '50%',
+                    transformOrigin: '0 0',
+                    transform: `rotate(${i * 60}deg) translateY(-60px)`,
+                    animationDelay: `${i * 0.05}s`,
+                  }}
+                />
+              ))}
+            </div>
           </div>
         )}
         <button
@@ -444,15 +466,12 @@ const QuoteDisplay: React.FC = () => {
         >
           {/* Quote Text */}
           <div
-             className={`transition-all duration-${quoteFadeDuration} ease-out`}
+             className={`transition-all duration-${quoteFadeDuration} ease-out ${!isQuoteVisible ? 'opacity-0 blur-md scale-95' : 'opacity-100 blur-0 scale-100'}`}
              style={{
-               opacity: isQuoteVisible ? 1 : 0,
                transform: `
-                 ${isQuoteVisible ? 'translateY(0) scale(1)' : 'translateY(8px) scale(0.98)'}
                  translateZ(30px)
                  translateX(${tilt.x * 0.8}px) translateY(${tilt.y * 0.8}px)
                `,
-               filter: isQuoteVisible ? 'blur(0px)' : 'blur(8px)',
                transformStyle: 'preserve-3d'
              }}
              aria-live="polite"
@@ -460,7 +479,7 @@ const QuoteDisplay: React.FC = () => {
           >
             <h1
               className={`
-                text-3xl sm:text-4xl md:text-5xl lg:text-quote-lg
+                ${getQuoteTextClass(currentQuote.text)}
                 font-serif font-bold text-white tracking-tighter leading-tight text-center
                 text-balance drop-shadow-sm select-none
                 ${isQuoteVisible ? 'animate-text-reveal' : ''}

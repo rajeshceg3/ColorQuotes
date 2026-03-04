@@ -113,10 +113,21 @@ export default {
         'bg-pan': 'bgPan 15s ease-in-out infinite',
         'heart-pop': 'heartPop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
         'text-reveal': 'textReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+        'blur-out': 'blurOut 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+        'sparkle': 'sparkle 0.8s ease-out forwards',
       },
       keyframes: {
+        blurOut: {
+          '0%': { opacity: '1', transform: 'translateY(0) scale(1)', filter: 'blur(0px)' },
+          '100%': { opacity: '0', transform: 'translateY(-12px) scale(0.95)', filter: 'blur(12px)' },
+        },
+        sparkle: {
+          '0%': { transform: 'scale(0) translateY(0)', opacity: '1' },
+          '50%': { opacity: '1' },
+          '100%': { transform: 'scale(1) translateY(-20px)', opacity: '0' },
+        },
         textReveal: {
-          '0%': { opacity: '0', transform: 'translateY(12px) scale(0.98)', filter: 'blur(8px)' },
+          '0%': { opacity: '0', transform: 'translateY(12px) scale(0.95)', filter: 'blur(12px)' },
           '100%': { opacity: '1', transform: 'translateY(0) scale(1)', filter: 'blur(0px)' },
         },
         fadeIn: {
